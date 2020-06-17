@@ -26,13 +26,11 @@ class KV(object):
         @param pfx: filename for storage (w/o ext)
         """
         self.__db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=dbno)
-        self.__db.delete()
-        assert res, "Can't open DB '%s'" % self.__fname
-        self.__counter = self.__db.count()
+        self.__counter = self.__db.dbsize()
 
     def clean(self):
-        self.__db.clear()
-        self.__counter = self.__db.count()
+        self.__db.flushdb()
+        self.__counter = self.__db.dbsize()
 
     def get_count(self) -> int:
         """Ask counter
@@ -41,9 +39,9 @@ class KV(object):
         return self.__counter  # self.__db.count()
 
     def exists(self, key) -> bool:
-        return self.__db.check(key) >= 0  # -1 on not found
+        return self.__db.exists(key) >= 0
 
-    def get(self, key) -> int:
+    def get(self, key) -> int:  # or None
         """
         Get value by key
         TODO: add strict mode (get or exception)
@@ -59,7 +57,7 @@ class KV(object):
          Adds record _strictly_ (no dup)
          @return: v of new record; exception if exists
          """
-        res = self.__db.add(key, self.__counter)  # True on success, False if exists; set == add_or_replace
+        res = self.__db.setnx(key, self.__counter)
         assert res, "Can't add record k=%s, v=%d" % (_prn_key(key), self.__counter)
         self.__counter += 1
         return self.__counter - 1

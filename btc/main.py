@@ -2,9 +2,8 @@
 8. All together.
 - 0 - just walk (+bk_size, +txs)
 - 1 - +vins,+vouts
-- 2 - +store (inmem) txs (tx.id:no), addrs; gen data
-- 3 - +store (file)
-- 4 - +txout (tx.no:vout.n)
+- 2 - +store (file) txs (tx.id:no), addrs; gen data
+- 3 - +txout (tx.no:vout.n)
 """
 
 import argparse

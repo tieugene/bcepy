@@ -8,6 +8,7 @@ import json
 
 import btc.heap as heap
 # from btc.kv.inmem import KV
+# from btc.kv.rds import KV
 from btc.kv.kc import KV
 from btc.utils import snow, Memer, pk2addr
 
@@ -20,9 +21,13 @@ __line = "===\t=======\t=======\t=======\t=======\t=======\t=======\t====="
 def prepare():
     global Tx, Addr
     Tx = KV()
+    # Tx.open(0)
     Tx.open("/mnt/sdb2/tmp/tx")
+    Tx.clean()
     Addr = KV()
+    # Addr.open(1)
     Addr.open("/mnt/sdb2/tmp/addr")
+    Addr.clean()
     heap.memer = Memer()
     heap.memer.start()
 
@@ -49,9 +54,9 @@ def __out_bk(bk_no: int, ts: int, hsh: str):
         print("b\t%d\t'%s'\t'%s'" % (bk_no, datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S"), hsh))
 
 
-def __out_tx(tx_no: int, hsh: str):
+def __out_tx(tx_no: int, bk_no: int, hsh: str):
     if heap.Opts.out:
-        print("t\t%d\t'%s'" % (tx_no, hsh))
+        print("t\t%d\t%d\t'%s'" % (tx_no, bk_no, hsh))
 
 
 def __out_vin(out_no: int, out_n: int, in_no: int):
@@ -63,9 +68,11 @@ def __out_addr(addr_no: int, lst: list):
     if heap.Opts.out:
         if len(lst) == 1:
             s = '"%s"' % lst[0]
+            n = 1
         else:
             s = json.dumps(lst)
-        print("a\t%d\t%s" % (addr_no, s))
+            n = len(s)
+        print("a\t%d\t%s\t%d" % (addr_no, s, n))
 
 
 def __out_vout(tx_no: int, n: int, satoshi: int, addr: int):
@@ -94,7 +101,7 @@ def work_bk(bk):
         tx_hash_s = tx["txid"]  # str repr
         tx_hash_b = bytes.fromhex(tx_hash_s)
         tx_no = Tx.add(tx_hash_b)
-        __out_tx(tx_no, tx_hash_s)
+        __out_tx(tx_no, heap.bk_no, tx_hash_s)
         for vin_n, vin in enumerate(tx["vin"]):
             # 3. vin
             if 'coinbase' in vin:
