@@ -202,3 +202,10 @@ gettxoutsetinfo
 1st tx: 4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b
 
 - get all actual blocks: [bulk] getblockhash 0..629xxx
+
+## 200620:
+
+- try:
+  - [python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
+  - [slick-bitcoinrpc](https://github.com/barjomet/slick-bitcoinrpc)
+  - [python-bitcoinrpc-async](https://github.com/bibajz/bitcoin-python-async-rpc)

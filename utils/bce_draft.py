@@ -1,16 +1,19 @@
 #!/bin/env python3
 """
-Counts all blocks and transactions
+Counts all blocks, transactions[, vins, vouts]
 3rd parties:
+- python3-configobj
 - python3-bitcoinrpc
 """
 
 import sys
 import argparse
 import datetime
+import os
+import platform
 import time
-
-from authproxy import AuthServiceProxy
+from configobj import ConfigObj
+from bitcoinrpc.authproxy import AuthServiceProxy
 
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
@@ -29,12 +32,34 @@ tpl = (
     )
 )
 
+
 def eprint(s: str):
+    """ Print log to stderr [and logfile] """
     global logfile
     print(s, file=sys.stderr)
     if logfile:
         print(s, file=logfile)
         logfile.flush()
+
+
+def load_cfg() -> object:
+    if platform.system() == 'Darwin':
+        btc_conf_file = os.path.expanduser('~/Library/Application Support/Bitcoin/')
+    elif platform.system() == 'Windows':
+        btc_conf_file = os.path.join(os.environ['APPDATA'], 'Bitcoin')
+    else:
+        btc_conf_file = os.path.expanduser('~/.bitcoin')
+    btc_conf_file = os.path.join(btc_conf_file, 'bitcoin.conf')
+    if not os.path.exists(btc_conf_file):
+        raise Exception("Can't find '{}'".format(btc_conf_file))
+    cfg = ConfigObj(btc_conf_file)
+    if ('rpcuser' not in cfg) or ('rpcpassword' not in cfg):
+        raise Exception("Not 'rpcuser' or 'rpcpassword' in bitcoin.conf")
+    if 'rpcconnect' not in cfg:
+        cfg['rpcconnect'] = 'localhost'
+    if 'rpcport' not in cfg:
+        cfg['rpcport'] = '8332'
+    return cfg
 
 
 def walk(kbeg: int, kty: int, v: bool):
@@ -50,7 +75,9 @@ def walk(kbeg: int, kty: int, v: bool):
     txs = 0
     ins = 0
     outs = 0
-    rpc_connection = AuthServiceProxy("http://login:password@127.0.0.1:8332", timeout=300)  # for heavy load
+    cfg = load_cfg()
+    url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
+    rpc_connection = AuthServiceProxy(url, timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(bk_no)
     eprint("%s\n%s" % (tpl[v][0], tpl[v][1]))
     # 1. go
