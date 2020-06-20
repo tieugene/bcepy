@@ -12,7 +12,7 @@ import time
 
 from authproxy import AuthServiceProxy
 
-Dup_Blocks = {91722, 91842}  # duplicate 91880, 91812
+Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
 Interim_Size = 1000
 logfile = None
