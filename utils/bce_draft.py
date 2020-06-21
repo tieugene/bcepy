@@ -3,7 +3,13 @@
 Counts all blocks, transactions[, vins, vouts]
 3rd parties:
 - python3-configobj
-- python3-bitcoinrpc
+- python3-bitcoinrpc, python-slickrpc, ...-async
+Tests:
+[- ~norm~/-O/~pypy3~]
+        100 200
+brpc    ... ...
+slick   ... ...
+async   ... ...
 """
 
 import sys
@@ -13,7 +19,8 @@ import os
 import platform
 import time
 from configobj import ConfigObj
-from bitcoinrpc.authproxy import AuthServiceProxy
+from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
+# from slickrpc import Proxy
 
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
@@ -77,7 +84,7 @@ def walk(kbeg: int, kty: int, v: bool):
     outs = 0
     cfg = load_cfg()
     url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
-    rpc_connection = AuthServiceProxy(url, timeout=300)  # for heavy load
+    rpc_connection = Proxy(url, timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(bk_no)
     eprint("%s\n%s" % (tpl[v][0], tpl[v][1]))
     # 1. go
