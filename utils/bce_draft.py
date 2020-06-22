@@ -19,8 +19,8 @@ import os
 import platform
 import time
 from configobj import ConfigObj
-from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
-# from slickrpc import Proxy
+# from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
+from slickrpc import Proxy
 
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000

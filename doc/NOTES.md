@@ -206,6 +206,6 @@ gettxoutsetinfo
 ## 200620:
 
 - try:
-  - [python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
-  - [slick-bitcoinrpc](https://github.com/barjomet/slick-bitcoinrpc)
-  - [python-bitcoinrpc-async](https://github.com/bibajz/bitcoin-python-async-rpc)
+  - +[python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
+  - +[slick-bitcoinrpc](https://github.com/barjomet/slick-bitcoinrpc)
+  - [~~python-bitcoinrpc-async~~](https://github.com/bibajz/bitcoin-python-async-rpc) - no httpx nor orjson
