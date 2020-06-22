@@ -211,7 +211,9 @@ gettxoutsetinfo
   - [~~python-bitcoinrpc-async~~](https://github.com/bibajz/bitcoin-python-async-rpc) - no httpx nor orjson
 
 ## Notes:
+
 ### Max:
+
 - Tx/bk	12239	(480k)
 - In/tx	20000	(480k)
 - Out/tx	13107	(480k)
@@ -219,3 +221,17 @@ gettxoutsetinfo
   - mem ~= tc
   - tc ~= 1..2xRedis (150kbk)
 - RPC: slickrpc ~= 20% faster bitcoinrpc
+
+## 1sts:
+
+- vin < vout: 170
+- single addresses: 728
+- multiaddress: 164467 (165224 165227 165328 166451 167579 170741 170766:
+  - Multiaddress: 164467 ['1AJbsFZ64EpEfS5UAjAfcUG8pH8Jn3rn1F', '1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq']
+  - 165224 ['1ETBbsHPvbydW7hGWXXKXZ3pxVh3VFoMaX', '1AJbsFZ64EpEfS5UAjAfcUG8pH8Jn3rn1F', '1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq']
+  - 165227 ['1EJs4UCxotGu8QYf5wUjCvmATzCpctUTmF', '1AJbsFZ64EpEfS5UAjAfcUG8pH8Jn3rn1F', '1A8JiWcwvpY7tAopUkSnGuEYHmzGYfZPiq']
+  - 165328 ['13cCk3LG1VMrkxf5ZoWJFke7dw7ZLw5CwH', '13pbXfW1YDy9vkenYiSFDuv7mADpUCrKqL', '16dKTKxwsgqZzkbU6RDaXd9cuL5an6ZLMY']
+  - 166451 ['1EdEfrJSF2AszUFbTXKu17P9Ck8DjNGhNW', '1NiA6V8Ges2vEkSx11X5oo2aCyTsCv3XH3', '18am8jUnBqru2jtQpQbE4LCywBWUPUooP1']
+  - 167579 ['1NiA6V8Ges2vEkSx11X5oo2aCyTsCv3XH3', '18am8jUnBqru2jtQpQbE4LCywBWUPUooP1', '1Fr1wwdwoNH3F7zFAvcWJte5vsacto3EXC']
+  - 170741 ['1VayNert3x1KzbpzMGt2qdqrAThiRovi8', '1VayNert3x1KzbpzMGt2qdqrAThiRovi8']
+  - 170766 ['1VayNert3x1KzbpzMGt2qdqrAThiRovi8', '1VayNert3x1KzbpzMGt2qdqrAThiRovi8']
