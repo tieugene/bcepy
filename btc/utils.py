@@ -7,6 +7,7 @@ import hashlib
 import base58
 from pathlib import Path
 from resource import getpagesize
+from configobj import ConfigObj
 import btc.heap as heap
 
 PAGESIZE = getpagesize()
@@ -14,10 +15,12 @@ PATH = Path('/proc/self/statm')
 
 
 def snow() -> str:
+    """ String repr of current datetime """
     return datetime.datetime.now().strftime('%y.%m.%d %H:%M:%S')
 
 
 def eprint(s: str):
+    """ Print log into stderr [and logfile] """
     print(s, file=sys.stderr)
     if heap.logfile:
         print(s, file=heap.logfile)
@@ -27,7 +30,6 @@ def eprint(s: str):
 def load_conf(btc_conf_file: str = None) -> str:
     """
     Load bitcoin.conf.
-    Powered by python-bitcoinlib.rpc module.
     @param btc_conf_file
     @return connection url (default "http://login:password@127.0.0.1:8332")
     """
@@ -40,25 +42,17 @@ def load_conf(btc_conf_file: str = None) -> str:
         else:
             btc_conf_file = os.path.expanduser('~/.bitcoin')
         btc_conf_file = os.path.join(btc_conf_file, 'bitcoin.conf')
-    # Extract contents of bitcoin.conf to build service_url
-    conf = {}
-    try:
-        with open(btc_conf_file, 'r') as fd:
-            for line in fd.readlines():
-                if '#' in line:
-                    line = line[:line.index('#')]
-                if '=' not in line:
-                    continue
-                k, v = line.split('=', 1)
-                conf[k.strip()] = v.strip()
-    # Treat a missing bitcoin.conf as though it were empty
-    except FileNotFoundError:
-        pass
-    # Defaults
-    conf['rpchost'] = conf.get('rpcconnect', 'localhost')
-    conf['rpcport'] = int(conf.get('rpcport', '8332'))
-    return ('http://%s:%s@%s:%d' %
-            (conf['rpcuser'], conf['rpcpassword'], conf['rpchost'], conf['rpcport']))
+    if not os.path.exists(btc_conf_file):
+        raise Exception("Can't find '{}'".format(btc_conf_file))
+    cfg = ConfigObj(btc_conf_file)
+    if ('rpcuser' not in cfg) or ('rpcpassword' not in cfg):
+        raise Exception("Not 'rpcuser' or 'rpcpassword' in bitcoin.conf")
+    if 'rpcconnect' not in cfg:
+        cfg['rpcconnect'] = 'localhost'
+    if 'rpcport' not in cfg:
+        cfg['rpcport'] = '8332'
+    return ('http://{}:{}@{}:{}'.format(
+            cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport']))
 
 
 class Timer(object):

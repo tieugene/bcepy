@@ -3,13 +3,8 @@
 Counts all blocks, transactions[, vins, vouts]
 3rd parties:
 - python3-configobj
-- python3-bitcoinrpc, python-slickrpc, ...-async
-Tests:
-[- ~norm~/-O/~pypy3~]
-        100 200
-brpc    ... ...
-slick   ... ...
-async   ... ...
+- python3-slickrpc
+- python3-ujson
 """
 
 import sys

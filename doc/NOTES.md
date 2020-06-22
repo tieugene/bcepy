@@ -209,3 +209,13 @@ gettxoutsetinfo
   - +[python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
   - +[slick-bitcoinrpc](https://github.com/barjomet/slick-bitcoinrpc)
   - [~~python-bitcoinrpc-async~~](https://github.com/bibajz/bitcoin-python-async-rpc) - no httpx nor orjson
+
+## Notes:
+### Max:
+- Tx/bk	12239	(480k)
+- In/tx	20000	(480k)
+- Out/tx	13107	(480k)
+- KV:
+  - mem ~= tc
+  - tc ~= 1..2xRedis (150kbk)
+- RPC: slickrpc ~= 20% faster bitcoinrpc
