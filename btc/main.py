@@ -9,8 +9,8 @@
 import argparse
 import datetime
 
-from bitcoinrpc.authproxy import AuthServiceProxy
-# from authproxy import AuthServiceProxy
+# from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
+from slickrpc import Proxy
 
 import btc.heap as heap
 from btc.utils import load_conf, eprint, Timer
@@ -31,7 +31,7 @@ def walk(kbeg: int, kty: int):
     # 0. prepare
     heap.bk_no = kbeg
     bk_to = heap.bk_no + (kty * heap.Bulk_Size)
-    rpc_connection = AuthServiceProxy(load_conf(), timeout=300)  # for heavy load
+    rpc_connection = Proxy(load_conf(), timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(heap.bk_no)
     heap.timer = Timer()
     mode.prepare()
