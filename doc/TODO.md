@@ -12,4 +12,4 @@
 - bench util/
 - continue m2 () / show state
 - test queries
-- ?C++ verision (ujson)
+- ?C++ verision (bitcoin-cli, ujson) - libjson-rpc-cpp-*
