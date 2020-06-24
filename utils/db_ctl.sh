@@ -1,33 +1,32 @@
 #!/bin/sh
 # Tool to manipulate bce interim data
 
-declare -a table
+declare -A table
 table=([b]=blocks [t]=transactions [a]=addresses [d]=data)
-echo "${table[b]}"
+# echo ${table[b]}
 
 function help() {
-  echo "Usage: $0 <cmd> <table>\n\
-  cmd:\n\
-    drop:\tdrop table\n\
-    create:\tcreate table from scratch\n\
-    show:\tshow table structure\n\
-    trunc:\tdelete all records\n\
-    idxoff:\tdelete all indices and constraints\n\
-    idxon:\tcreate all indices and constraints\n\
-    vacuum:\tvacuum table\n\
-    load:\tload table from txt data\n\
-  table:\n\
-    b\tblocks\n\
-    t\ttransactions\n\
-    a\taddresses\n\
-    d\tdata\n\
-    z\tall\
-"
+  echo "Usage: $0 <cmd> <table>
+  cmd:
+    drop:	drop table
+    create: create table from scratch
+    show:   show table structure
+    trunc:  delete all records
+    idxoff: delete all indices and constraints
+    idxon:  create all indices and constraints
+    vacuum: vacuum table
+    load:   load table from txt data
+  table:
+    b:  blocks
+    t:  transactions
+    a:  addresses
+    d:  data
+    z:  all"
   exit
 }
 
 function chk_table() {
-  if [[ ! "abdt" =~ $1 ]]; then
+  if [[ ! "btad" =~ $1 ]]; then
     echo "Bad table '$1'"
     help
   fi
@@ -64,7 +63,7 @@ case "$1" in
   create)
     create $2;;
   show)
-    show $2;;
+    show $2;;   # RTFM: https://www.postgresqltutorial.com/postgresql-describe-table/
   trunc)
     trunc $2;;
   idxoff)

@@ -1,10 +1,13 @@
 #!/bin/env python3
 """
-Exports bitcoind data to sql/plaintext
+Exports bitcoind data to sql-ready plaintext
 3rd parties:
-- python3-bitcoinrpc
+- python3-configobj
 - python3-kyotocabinet
 - python3-base58
+- [python3-ujson]
+Bundled:
+- python3-bitcoinrpc
 """
 
 from btc.main import main

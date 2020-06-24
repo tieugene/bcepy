@@ -3,8 +3,7 @@
 Counts all blocks, transactions[, vins, vouts]
 3rd parties:
 - python3-configobj
-- python3-slickrpc
-- python3-ujson
+- [python3-ujson]
 """
 
 import sys
@@ -14,8 +13,7 @@ import os
 import platform
 import time
 from configobj import ConfigObj
-# from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
-from slickrpc import Proxy
+from btc.authproxy import AuthServiceProxy as Proxy
 
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
