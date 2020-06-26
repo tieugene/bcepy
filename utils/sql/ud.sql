@@ -1,3 +1,4 @@
+-- data
 ALTER TABLE data DROP CONSTRAINT IF EXISTS data_pkey;
 ALTER TABLE data DROP CONSTRAINT IF EXISTS data_t_out_id_fkey;
 ALTER TABLE data DROP CONSTRAINT IF EXISTS data_t_in_id_fkey;

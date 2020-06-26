@@ -1,2 +1,0 @@
-#!/bin/sh
-sudo -u bitcoin /usr/sbin/bitcoind -conf=/etc/bitcoin/bitcoin.conf
