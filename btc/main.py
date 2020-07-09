@@ -9,8 +9,8 @@
 import argparse
 import datetime
 
-# from bitcoinrpc.authproxy import AuthServiceProxy as Proxy
-from slickrpc import Proxy
+from btc.authproxy import AuthServiceProxy as Proxy
+# from slickrpc import Proxy
 
 import btc.heap as heap
 from btc.utils import load_conf, eprint, Timer
