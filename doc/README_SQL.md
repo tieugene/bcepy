@@ -36,7 +36,7 @@ sudo postgresql-setup --initdb
 
 ```
 sudo systemctl start postgresql
-sudo -i -u postgres psql -c "\password [postgres]"
+sudo -i -u postgres psql -c "\password <superpassword>"
 ...
 # check
 psql -U postgres [-W]

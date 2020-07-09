@@ -3,7 +3,7 @@ m2: Process (inmem).
 inmem tx.id, addr.id storage
 """
 
-import datetime
+import datetime, os
 import json
 
 import btc.heap as heap
@@ -22,11 +22,11 @@ def prepare():
     global Tx, Addr
     Tx = KV()
     # Tx.open(0)
-    Tx.open("/mnt/sdb2/tmp/tx")
+    Tx.open(os.path.join(heap.kvdir, "tx"))
     Tx.clean()
     Addr = KV()
     # Addr.open(1)
-    Addr.open("/mnt/sdb2/tmp/addr")
+    Addr.open(os.path.join(heap.kvdir, "addr"))
     Addr.clean()
     heap.memer = Memer()
     heap.memer.start()

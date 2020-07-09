@@ -2,8 +2,9 @@
 # Tool to manipulate bce interim data
 
 declare -A table
-table=([b]=blocks [t]=transactions [a]=addresses [d]=data [z]="blocks,transactions,addresses,data")
-# echo ${table[b]}
+table=([a]="addresses" [b]="blocks" [t]="transactions" [d]="data" [z]="blocks,transactions,addresses,data")
+declare -A fields
+fields=([a]="a_id,a_list,n" [b]="b_id,b_time" [t]="t_id,b_id,hash" [d]="t_out_id,t_out_n,satoshi,a_id,t_in_id")
 
 dbname=""
 dbuser=""
@@ -14,7 +15,7 @@ function help() {
   echo "Usage: $0 <cmd> <table>
   cmd:
     drop:   drop table
-    create: create table from scratch
+    create: create table
     show:   show table structure
     trunc:  delete all records
     idxoff: delete all indices and constraints
@@ -45,16 +46,16 @@ function drop() {
   # psql -c "DROP TABLE $t;" $dbname $dbuser
 }
 
-function trunc() {
-  t=${table[$1]}
-  echo "Truncate table[s] '$t'."
-  # psql -c "TRUNCATE TABLE $t;" $dbname $dbuser
-}
-
 function vacuum() {
   t=${table[$1]}
   echo "Vacuum table[s] '$t'."
   # psql -c "VACUUM FULL TABLE $t;" $dbname $dbuser
+}
+
+function trunc() {
+  t=${table[$1]}
+  echo "Truncate table[s] '$t'."
+  # psql -c "TRUNCATE TABLE $t;" $dbname $dbuser
 }
 
 # separate
@@ -65,7 +66,7 @@ function create() {
     # psql -f $t $dbname $dbuser
   else
     echo "Create all tables."
-    # cat $dn/sql/{cb.sql,ct.sql,ca.sql,cd.sql} | psql $dbname $dbuser
+    # cat $dn/sql/{ca.sql,cb.sql,ct.sql,cd.sql} | psql $dbname $dbuser
   fi
 }
 
@@ -76,7 +77,7 @@ function idxoff() {
     # psql -f $t $dbname $dbuser
   else
     echo "Drop all indices."
-    # cat $dn/sql/{ud.sql,ut.sql,ua.sql,ub.sql} | psql $dbname $dbuser
+    # cat $dn/sql/{ud.sql,ut.sql,ub.sql,ua.sql} | psql $dbname $dbuser
   fi
 }
 
@@ -87,7 +88,7 @@ function idxon() {
     # psql -f $t $dbname $dbuser
   else
     echo "Create all indices."
-    # cat $dn/sql/{ib.sql,it.sql,ia.sql,id.sql} | psql $dbname $dbuser
+    # cat $dn/sql/{ia.sql,ib.sql,it.sql,id.sql} | psql $dbname $dbuser
   fi
 }
 
@@ -102,8 +103,15 @@ function show() {
 
 function load() {
   # TODO: separate for each
+  # TODO: chk stdin is empty (https://unix.stackexchange.com/questions/33049/how-to-check-if-a-pipe-is-empty-and-run-a-command-on-the-data-if-it-isnt)
   t=${table[$]}
-  echo "Load table '$t'"
+  echo "Load table '$t'" >> /dev/stderr
+  # unpigz -c $1.txt.gz | psql -q -c "COPY ${table[$1]} (${fileds[$1]}) FROM STDIN;" $dbname $dbuser
+}
+
+function refresh() {
+  echo "refresh table"
+  # idxoff && trunc && vacuum && load [&& vacuum] && idxon && vacuum
 }
 
 # 1. chk options
@@ -119,18 +127,18 @@ chk_table $2
 case "$1" in
   drop)
     drop    $2;;
-  trunc)
-    trunc   $2;;
   vacuum)
     vacuum  $2;;
+  trunc)
+    trunc   $2;;
   create)
     create  $2;;
-  show)
-    show    $2;;
   idxoff)
     idxoff  $2;;
   idxon)
     idxon   $2;;
+  show)
+    show    $2;;
   load)
     load    $2;;
   *)

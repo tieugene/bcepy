@@ -1,2 +1,2 @@
 #!/bin/sh
-./bce.py -m 2 -q 250 -l -o | pigz -c > 250.txt.gz
+./bce.py -m 2 -q 10 -l -o | pigz -c > 10.txt.gz

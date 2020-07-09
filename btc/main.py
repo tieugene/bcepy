@@ -59,6 +59,7 @@ def init_cli():
     parser.add_argument('-k', '--keep', action='store_true', help='Keep existing Tx/Addr (default=false)')
     parser.add_argument('-l', '--log', action='store_true', help='Logfile (default=false)')
     parser.add_argument('-o', '--out', action='store_true', help='DB output (default=false)')
+    parser.add_argument('-c', '--cache', type=str, metavar='dir', nargs='?', default=".", help='Cache dir (default=.)')
     return parser
 
 
@@ -80,4 +81,5 @@ def main():
         heap.Opts.mode = args.mode[0]
         heap.Opts.keep = args.keep
         heap.Opts.out = args.out
+        heap.kvdir = args.cache
         walk(args.beg, args.qty)
