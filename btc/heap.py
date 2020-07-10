@@ -3,7 +3,7 @@
 # consts
 Bulk_Size = 1000
 Interim_Size = 1000
-Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
+Dup_Blocks = {91722, 91842}  # duplicate 91880, 91812
 
 # counters; TODO: object.attr
 bk_vol = 0         # blocks size accumulator
