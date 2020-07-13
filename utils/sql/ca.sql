@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS addresses (
 	n INT NOT NULL,
 	a_list JSONB NOT NULL UNIQUE
 );
-CREATE INDEX idx_addresses_n ON addresses (n);
+CREATE INDEX IF NOT EXISTS idx_addresses_n ON addresses (n);

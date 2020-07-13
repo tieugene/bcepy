@@ -21,9 +21,9 @@ Blockchain export (python version)
 	# 1. blocks (1'):
 	unpigz -c $SRCFILE | grep ^b | gawk -F "\t" -v OFS="\t" '{print $2,$3}' | pigz -c > b.txt.gz
 	# 2. tx (7/11'):
-	unpigz -c $SRCFILE | grep ^t | gawk -F "\t" -v OFS="\t" '{print $2,$3}' | pigz -c > t.txt.gz
+	unpigz -c $SRCFILE | grep ^t | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | pigz -c > t.txt.gz
 	# 3. address (4/6'):
-	unpigz -c $SRCFILE | grep ^a | gawk -F "\t" -v OFS="\t" '{print $2,$3}' | pigz -c > a.txt.gz
+	unpigz -c $SRCFILE | grep ^a | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | pigz -c > a.txt.gz
 	# 4. data
 	# 4.1. filter vouts (out_tx, out_n, satoshi, addr) (8/13')
 	unpigz -c $SRCFILE | grep ^o | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4,$5}' | pigz -c > o.txt.gz
@@ -52,6 +52,9 @@ Blockchain export (python version)
 	# 3. Post: switch indexes on; vacuum all
 	psql -q -f idx_on.sql $DBNAME $DBUSER
 	```
+
+x. Chk result:
+psql -q -c "SELECT SUM(satoshi) AS itogo FROM data WHERE t_in_id IS NULL;" $DBNAME $DBUSER
 
 ## RTFM
 

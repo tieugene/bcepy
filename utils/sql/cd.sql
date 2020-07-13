@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS data (
 	satoshi BIGINT NOT NULL,
 	PRIMARY KEY (t_out_id, t_out_n)
 );
-CREATE INDEX idx_data_t_in_id ON data (t_in_id);
-CREATE INDEX idx_data_a_id ON data (a_id);
-CREATE INDEX idx_data_satoshi ON data (satoshi);
+CREATE INDEX IF NOT EXISTS idx_data_t_in_id ON data (t_in_id);
+CREATE INDEX IF NOT EXISTS idx_data_a_id ON data (a_id);
+CREATE INDEX IF NOT EXISTS idx_data_satoshi ON data (satoshi);

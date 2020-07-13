@@ -56,7 +56,7 @@ def __out_bk(bk_no: int, ts: int, hsh: str):
 
 def __out_tx(tx_no: int, bk_no: int, hsh: str):
     if heap.Opts.out:
-        print("t\t%d\t%d\t'%s'" % (tx_no, bk_no, hsh))
+        print("t\t%d\t%d\t%s" % (tx_no, bk_no, hsh))
 
 
 def __out_vin(out_no: int, out_n: int, in_no: int):
