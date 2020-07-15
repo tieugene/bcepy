@@ -210,6 +210,9 @@ gettxoutsetinfo
   - +[slick-bitcoinrpc](https://github.com/barjomet/slick-bitcoinrpc)
   - [~~python-bitcoinrpc-async~~](https://github.com/bibajz/bitcoin-python-async-rpc) - no httpx nor orjson
 
+## 200715:
+m2 chk kbeg vs kv.size:
+
 ## Notes:
 
 ### Max:

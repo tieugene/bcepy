@@ -106,7 +106,7 @@ function show() {
 }
 
 function filter() {
-  # TODO: argc, src exists
+  # TODO: argc, src exists; multiple src
   echo "Filter by '$1'" >> /dev/stderr
   case "$1" in
   a)
@@ -122,7 +122,7 @@ function filter() {
     # 3. sort vins by vouts
     unpigz -c $2 | grep ^i | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | sort -n -k1 -k2 -T $tmpdir | pigz -c > $tmpdir/i.txt.gz
     # 4. join vouts | vins
-    python3 join_io.py $tmpdir/o.txt.gz $tmpdir/i.txt.gz;;
+    python3 join_io.py $tmpdir/o.txt.gz $tmpdir/i.txt.gz && rm -f $tmpdir/{i,o}.txt.gz;;
   *)
     echo "Bad filter '$1'";;
   esac

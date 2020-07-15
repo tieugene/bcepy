@@ -27,7 +27,7 @@ class KV(object):
         @param fname: filename for storage (w/o ext)
         """
         self.__fname = fname + ".kch"
-        res = self.__db.open(self.__fname, kyotocabinet.DB.OWRITER | kyotocabinet.DB.OCREATE | kyotocabinet.DB.OTRUNCATE)  #
+        res = self.__db.open(self.__fname, kyotocabinet.DB.OWRITER | kyotocabinet.DB.OCREATE)  #  | kyotocabinet.DB.OTRUNCATE
         assert res, "Can't open DB '%s'" % self.__fname
         self.__counter = self.__db.count()
 

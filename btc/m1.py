@@ -9,7 +9,7 @@ import btc.heap as heap
 __line = "===\t=======\t=======\t=======\t=======\t====="
 
 
-def prepare():
+def prepare(kbeg: int):
     pass
 
 

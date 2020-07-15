@@ -10,7 +10,7 @@ import btc.heap as heap
 # from btc.kv.inmem import KV
 # from btc.kv.rds import KV
 from btc.kv.kc import KV
-from btc.utils import snow, Memer, pk2addr
+from btc.utils import snow, Memer, pk2addr, eprint
 
 Tx = None
 Addr = None
@@ -18,16 +18,37 @@ Addr = None
 __line = "===\t=======\t=======\t=======\t=======\t=======\t=======\t====="
 
 
-def prepare():
+def prepare(kbeg: int) -> bool:
+    """
+     t  beg kv  res
+     =  === ==  ===
+     +  N   0   ok
+     +  0   0   ok
+     +  1+  0   err ("k-v empty")
+     +  N   1+  err ("set -f")
+     +  0   1+  ok (+clear)
+     x! 1+  1+  ok
+    :return: True if ok
+    """
     global Tx, Addr
     Tx = KV()
     # Tx.open(0)
     Tx.open(os.path.join(heap.kvdir, "tx"))
-    Tx.clean()
     Addr = KV()
     # Addr.open(1)
     Addr.open(os.path.join(heap.kvdir, "addr"))
-    Addr.clean()
+    tx_count = Tx.get_count()
+    if (tx_count):
+        if (kbeg is None):
+            eprint("Error: Tx is not empty ({} items). Set -f option.".format(tx_count))
+            return True
+        if (kbeg == 0):
+            Tx.clean()
+            Addr.clean()
+    else:
+        if kbeg:
+            eprint("Error: Tx is empty. Use '-f 0' or skip it.")
+            return True
     heap.memer = Memer()
     heap.memer.start()
 
