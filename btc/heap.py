@@ -23,6 +23,7 @@ class   Opts(object):
     keep = False
     log = False
     out = False
+    jsdir = None
     kvdir = "."
 
 # misc vars

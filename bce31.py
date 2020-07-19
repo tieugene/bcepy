@@ -1,6 +1,6 @@
 #!/bin/env python3
 """
-Export bvitcoind data to gziped jsons.
+Export bitcoind data to gziped jsons.
 3rd parties: None
 time (kbk, macbook, wifi):
 1   4

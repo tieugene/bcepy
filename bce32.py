@@ -1,10 +1,10 @@
 #!/bin/env python3
 """
-Export bvitcoind data to gziped jsons.
-3rd parties: None
-time (kbk, macbook, wifi):
-1   4
-100 718 (60=>396MB)
+Process bitcoind gziped jsons into SQL-ready data.
+3rd parties:
+- python3-kyotocabinet
+- python3-base58
+- [python3-ujson]
 """
 from btc.main32 import main
 
