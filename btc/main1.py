@@ -129,7 +129,3 @@ def main():
     if args.log:
         logfile = open("%s.log" % datetime.datetime.now().strftime('%y%m%d%H%M%S'), 'wt')
     walk(args.beg, args.qty, args.verbose)
-
-
-if __name__ == "__main__":
-    main()

@@ -10,7 +10,7 @@ Bundled:
 - python3-bitcoinrpc
 """
 
-from btc.main import main
+from btc.main2 import main
 
 if __name__ == "__main__":
     main()
