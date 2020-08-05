@@ -10,12 +10,12 @@ import btc.heap as heap
 # from btc.kv.inmem import KV
 # from btc.kv.rds import KV
 from btc.kv.kc import KV
-from btc.utils import snow, Memer, pk2addr, eprint
+from btc.utils import snow, pk2addr, eprint
 
 Tx = None
 Addr = None
 
-__line = "===\t=======\t=======\t=======\t=======\t=======\t=======\t====="
+__line = "===\t=======\t=======\t=======\t=======\t====="
 
 
 def prepare(kbeg: int) -> bool:
@@ -33,10 +33,10 @@ def prepare(kbeg: int) -> bool:
     global Tx, Addr
     Tx = KV()
     # Tx.open(0)
-    Tx.open(os.path.join(heap.kvdir, "tx"))
+    Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
     Addr = KV()
     # Addr.open(1)
-    Addr.open(os.path.join(heap.kvdir, "addr"))
+    Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
     tx_count = Tx.get_count()
     if (tx_count):
         if (kbeg is None):
@@ -49,24 +49,24 @@ def prepare(kbeg: int) -> bool:
         if kbeg:
             eprint("Error: Tx is empty. Use '-f 0' or skip it.")
             return True
-    heap.memer = Memer()
-    heap.memer.start()
+    # heap.memer = Memer()
+    # heap.memer.start()
 
 
 def prn_head():
-    return "kBk\tSize\tTx\tIn\tOut\tAddr\tRAM\tTime\t%s (m2)\n%s" % (snow(), __line)
+    return "kBk\tTx\tIn\tOut\tAddr\tTime\t%s (m2)\n%s" % (snow(), __line)
 
 
 def prn_interim():
-    return "%03d\t%d\t%d\t%d\t%d\t%d\t%d\t%d" % (
-        heap.bk_no // heap.Bulk_Size, heap.bk_vol, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
-        heap.memer.now(), heap.timer.now())
+    return "%03d\t%d\t%d\t%d\t%d\t%d" % (
+        heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
+        heap.timer.now())
 
 
 def prn_tail():
-    return "%s\n%03d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t%s\nMax tx/bk:\t%d\nMax in/tx:\t%d\nMax out/tx:\t%d\nMax addr/out:\t%d" % \
-           (__line, heap.bk_no // heap.Bulk_Size, heap.bk_vol, heap.tx_count, heap.in_count, heap.out_count,
-            heap.addr_count, heap.memer.now(), heap.timer.now(), snow(),
+    return "%s\n%03d\t%d\t%d\t%d\t%d\t%d\t%s\nMax tx/bk:\t%d\nMax in/tx:\t%d\nMax out/tx:\t%d\nMax addr/out:\t%d" % \
+           (__line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
+            heap.addr_count, heap.timer.now(), snow(),
             heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
 
 
@@ -102,8 +102,8 @@ def __out_vout(tx_no: int, n: int, satoshi: int, addr: int):
 
 
 def work_bk(bk):
-    nTx = bk['nTx']
-    heap.bk_vol += bk['size']
+    nTx = len(bk['tx']) # bk['nTx']
+    # heap.bk_vol += bk['size']
     heap.tx_count += nTx
     heap.max_bk_tx = max(heap.max_bk_tx, nTx)
     # 1. bk

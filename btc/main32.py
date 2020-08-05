@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import pathlib
+import gzip
 
 import btc.heap as heap
 from btc.utils import load_conf, eprint, Timer

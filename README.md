@@ -1,6 +1,11 @@
 # bcepy
 Blockchain export (python version)
 
+## Who's who
+- bce1.py: shortest version, just walks through bitcoind
+- bce2.py: includes bce1 + export to SQL
+- bce3.py: splits bitcoind import and processing it
+
 ## Prereq
 - python3
 - python3-base58

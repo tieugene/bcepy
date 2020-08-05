@@ -155,11 +155,11 @@ def save_bk(bk: dict) -> bool:
 def walk(kbeg: int, kty: int, v: bool):
     """
     Main loop
-    @param kbeg: 1st Kblock
+    @param kbeg: starting Kblock
     @param kty: Kblocks to process
     """
     # 0. prepare
-    bk_no = kbeg
+    bk_no = kbeg * Bulk_Size
     bk_to = bk_no + (kty * Bulk_Size)
     size = 0
     txs = 0

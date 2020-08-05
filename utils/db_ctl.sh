@@ -14,7 +14,7 @@ dn=`dirname $0`
 cfgname=$dn/.db_ctl.cfg
 
 function help() {
-  echo "Usage: $0 <cmd> <table>
+  echo "Usage: $0 <cmd> <table> [<infile.gz>]
   cmd:
     drop:   drop table
     create: create table
@@ -89,7 +89,7 @@ function idxon() {
   if [ ! $1 = "z" ]; then
     t=$dn/sql/i$1.sql
     echo "Create indices of '${table[$1]}' from '$t'."
-    psql -f $t $dbname $dbuser
+    psql -q -f $t $dbname $dbuser
   else
     echo "Create all indices."
     cat $dn/sql/{ia.sql,ib.sql,it.sql,id.sql} | psql -q $dbname $dbuser
