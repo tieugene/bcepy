@@ -57,16 +57,16 @@ Bitcoind connection a...s are loading from bitcoin.conf as it is required for bi
 
 The same as bce1.py (`-m 0|1` option) but generates interim flat text for further conversion(`-m 2` option; steps 1..3).
 Next and last step - prepare this interim text and load into PostgreSQL using utils/db_ctl.sh (steps 4..6).
-db\_ctl.sh uses .db_ctl.cfg in the same directory for connecting to SQL DB (see (db_ctl.cfg sample)[doc/db_ctl.cfg.sample]).
+db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see (db\_ctl.cfg sample)[doc/db_ctl.cfg.sample]).
 
 ## Installation
 
-- bitcoind
-- PostgreSQL
+- [bitcoind](doc/bitcoind.md)
+- [PostgreSQL](doc/postgresql.md)
 - free space for (2020-09-01):
-  - blockchain (~400GB)
-  - PostgreSQL database (&infin;)
-  - interim bce2.py data (&infin;)
-  - key-value storage (&infin;)
+  - blockchain (~350GB+)
+  - PostgreSQL database (~&frac12; blockchain)
+  - interim bce2.py data (~&frac14; blockchain)
+  - key-value storage (~&frac14; blockchain)
   - temporary `sort` files (&infin;)
 - this package
