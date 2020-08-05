@@ -1,68 +1,72 @@
-# bcepy
-Blockchain export (python version)
+# bcepy - BitCoin Export (Python)
+
+Exports BTC blockchain into PostgreSQL.
+
+## Requires
+
+- bitcoind
+- postgresql-server
+- python3
+- python3-configobj
+- python3-base58
+- python3-kyotocabinet or python3-redis
+- python3-ujson (optionaly)
 
 ## Who's who
-- bce1.py: shortest version, just walks through bitcoind
-- bce2.py: includes bce1 + export to SQL
-- bce3.py: splits bitcoind import and processing it
 
-## Prereq
-- python3
-- python3-base58
-- python3-bitcoinrpc
-- python3-kyotocabinet | python3-redis
+- bce1.py: walks through bitcoind and count txs, vouts, vins
+- bce2.py: bce1 + export to SQL
+- bce3?.py: 2-part version of bce2:
+  - bce31.py: get data from bitcoin into interim json files
+  - bce32.py: export bce31.py results into interim txt files
+- utils/:
+  - db_ctl.sh: converts bce*.py results into SQL loadable data
+  - join\_io.py: used by db_ctl.sh to merge transaction vouts and vins
+
+## Explanation
+
+Storing blocks/transactions/addresses hashes in data table dircectly makes it extreme huge.
+The solution is to use block/tx/address order numbers (#).
+Target PostgreSQL DB consists from tables (see (db.svg)[doc/db.svg]):
+
+1. blocks (#, datetime)
+2. transactions (#, hash)
+3. data (transaction vouts and vins)
+4. addresses (#, hash)
+
+Process of bitcoind=>PostgreSQL conversion goes through next steps:
+
+1. Get data from bitcoind as json responses.
+2. Load into inmemory structures
+3. Calculate block/tx/address #s using external key-value storage
+4. Merge vouts and vins
+5. Export data into flat text ready to load into SQL DB
+6. Load those data into PostreSQL using `COPY` statements
 
 ## Usage
-1. Run bce (631 Kblocks):
-  ```
-  python3 bce.py -m 2 -q 631 -l -o | pigz > all.txt.gz
-  ```
-2. split into parts:
 
-	```
-	#!/bin/sh
-	SRCFILE = all.txt.gz
-	TMPDIR = /mnt/sdb2/tmp
-	# 1. blocks (1'):
-	unpigz -c $SRCFILE | grep ^b | gawk -F "\t" -v OFS="\t" '{print $2,$3}' | pigz -c > b.txt.gz
-	# 2. tx (7/11'):
-	unpigz -c $SRCFILE | grep ^t | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | pigz -c > t.txt.gz
-	# 3. address (4/6'):
-	unpigz -c $SRCFILE | grep ^a | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | pigz -c > a.txt.gz
-	# 4. data
-	# 4.1. filter vouts (out_tx, out_n, satoshi, addr) (8/13')
-	unpigz -c $SRCFILE | grep ^o | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4,$5}' | pigz -c > o.txt.gz
-	# 4.2. filter vins (out_tx, out_n, in_tx) (2/8')
-	unpigz -c $SRCFILE | grep ^i | gawk -F "\t" -v OFS="\t" '{print $2,$3,$4}' | pigz -c > i.txt.gz
-	# 4.3. sort vins by vouts (11/12')
-	unpigz -c i.txt.gz | sort -n -k1 -k2 -T $TMPDIR | pigz -c > is.txt.gz
-	# 4.4. join vouts | vins (7/13')
-	python3 join_io.py o.txt.gz is.txt.gz | pigz -c > d.txt.gz
-	```
-3. Load into DB:
+### bce1.py
 
-	```
-	#!/bin/sh
-	DBNAME=btcdb
-	DBUSER=btcuser
-	# 1. Prepare: switch indexes off; drop all records; vacuum all
-	psql -q -f idx_off.sql $DBNAME $DBUSER
-	psql -q -c "TRUNCATE TABLE data, addresses, transactions, blocks;" $DBNAME $DBUSER
-	psql -q -c "VACUUM FULL data, addresses, transactions, blocks;" $DBNAME $DBUSER
-	# 2. Load data: bk, tx, addresses, data
-	unpigz -c b.txt.gz | psql -q -c "COPY blocks (b_id, b_time) FROM STDIN;" $DBNAME $DBUSER
-	unpigz -c t.txt.gz | psql -q -c "COPY transactions (t_id, b_id, hash) FROM STDIN;" $DBNAME $DBUSER
-	unpigz -c a.txt.gz | psql -q -c "COPY addresses (a_id, a_list, n) FROM STDIN;" $DBNAME $DBUSER
-	unpigz -c d.txt.gz | psql -q -c "COPY data (t_out_id, t_out_n, satoshi, a_id, t_in_id) FROM STDIN;" $DBNAME $DBUSER # 3'30"
-	# 3. Post: switch indexes on; vacuum all
-	psql -q -f idx_on.sql $DBNAME $DBUSER
-	```
+Counts blocks size, transactions, vouts and vins querying bitcoind like `bitcoin-cli getblock <hash>` (steps 1..2).
+Without `-v` option short version ('verbosity=1') of bitcoind response used.
+`-v` option uses 'verbosity=2' queries.
+This utility is for tests and harware perfomance ratings.
+Bitcoind connection a...s are loading from bitcoin.conf as it is required for bitcoin-cli.
 
-x. Chk result:
-psql -q -c "SELECT SUM(satoshi) AS itogo FROM data WHERE t_in_id IS NULL;" $DBNAME $DBUSER
+### bce2.py
 
-## RTFM
+The same as bce1.py (`-m 0|1` option) but generates interim flat text for further conversion(`-m 2` option; steps 1..3).
+Next and last step - prepare this interim text and load into PostgreSQL using utils/db_ctl.sh (steps 4..6).
+db\_ctl.sh uses .db_ctl.cfg in the same directory for connecting to SQL DB (see (db_ctl.cfg sample)[doc/db_ctl.cfg.sample]).
 
-- [Lost BTCs](https://blog.okcoin.com/2020/05/12/btc-developer-asks-where-are-the-coins/):
-  - bitcoind options += "-txindex"
-  - bitcoind -reindex
+## Installation
+
+- bitcoind
+- PostgreSQL
+- free space for (2020-09-01):
+  - blockchain (~400GB)
+  - PostgreSQL database (&infin;)
+  - interim bce2.py data (&infin;)
+  - key-value storage (&infin;)
+  - temporary `sort` files (&infin;)
+- this package

@@ -1,0 +1,3 @@
+- [Lost BTCs](https://blog.okcoin.com/2020/05/12/btc-developer-asks-where-are-the-coins/):
+  - bitcoind options += "-txindex"
+  - bitcoind -reindex
