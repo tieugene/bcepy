@@ -27,7 +27,7 @@ Exports BTC blockchain into PostgreSQL.
 
 Storing blocks/transactions/addresses hashes in data table dircectly makes it extreme huge.
 The solution is to use block/tx/address order numbers (#).
-Target PostgreSQL DB consists from tables (see (db.svg)[doc/db.svg]):
+Target PostgreSQL DB consists from tables (see [db structure](doc/db.svg)):
 
 1. blocks (#, datetime)
 2. transactions (#, hash)
@@ -57,7 +57,7 @@ Bitcoind connection a...s are loading from bitcoin.conf as it is required for bi
 
 The same as bce1.py (`-m 0|1` option) but generates interim flat text for further conversion(`-m 2` option; steps 1..3).
 Next and last step - prepare this interim text and load into PostgreSQL using utils/db_ctl.sh (steps 4..6).
-db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see (db\_ctl.cfg sample)[doc/db_ctl.cfg.sample]).
+db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see [db\_ctl.cfg sample](doc/db_ctl.cfg.sample)).
 
 ## Installation
 
