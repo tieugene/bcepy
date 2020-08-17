@@ -63,6 +63,7 @@ db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see
 
 - [bitcoind](doc/bitcoind.md)
 - [PostgreSQL](doc/postgresql.md)
+- [Redis](doc/redis.md) (optional)
 - free space for (2020-09-01):
   - blockchain (~350GB+)
   - PostgreSQL database (~&frac12; blockchain)

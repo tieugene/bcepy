@@ -7,9 +7,6 @@ import datetime, os
 import json
 
 import btc.heap as heap
-# from btc.kv.inmem import KV
-# from btc.kv.rds import KV
-from btc.kv.kc import KV
 from btc.utils import snow, pk2addr, eprint
 
 Tx = None
@@ -31,12 +28,18 @@ def prepare(kbeg: int) -> bool:
     :return: True if ok
     """
     global Tx, Addr
-    Tx = KV()
-    # Tx.open(0)
-    Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
-    Addr = KV()
-    # Addr.open(1)
-    Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
+    if heap.Opts.kvdir: # defined => kyotocabinet
+        from btc.kv.kc import KV
+        Tx = KV()
+        Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
+        Addr = KV()
+        Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
+    else:               # redis
+        from btc.kv.rds import KV
+        Tx = KV()
+        Tx.open(0)
+        Addr = KV()
+        Addr.open(1)
     tx_count = Tx.get_count()
     if (tx_count):
         if (kbeg is None):

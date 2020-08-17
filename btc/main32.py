@@ -65,8 +65,8 @@ def init_cli():
                         help='Logfile (default=false)')
     parser.add_argument('-o', '--out', action='store_true',
                         help='DB output (default=false)')
-    parser.add_argument('-c', '--cache', type=str, metavar='dir', nargs='?', default=".",
-                        help='Cache dir (default=.)')
+    parser.add_argument('-c', '--cache', type=str, metavar='dir', nargs='?',
+                        help='Tokyocabinet dir (or Redis if none)')
     return parser
 
 

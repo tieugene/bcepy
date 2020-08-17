@@ -83,5 +83,5 @@ def main():
         heap.Opts.mode = args.mode
         # heap.Opts.keep = args.keep
         heap.Opts.out = args.out
-        heap.kvdir = args.cache
+        heap.Opts.kvdir = args.cache
         walk(args.beg, args.qty)
