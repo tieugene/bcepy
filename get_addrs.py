@@ -11,6 +11,7 @@ from btc.utils import load_conf, pk2addr, Timer, eprint
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Interim_Size = 1000
 
+
 def walk(qty: int = 0):
     rpc_connection = Proxy(load_conf(), timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(0)
@@ -45,12 +46,13 @@ def walk(qty: int = 0):
             eprint("{}\t{}".format(int((bk_no+1)/1000), heap.timer.now()))
     eprint("{}:\t{}".format(int((bk_no + 1)), heap.timer.now()))
 
+
 if __name__ == '__main__':
-    qty = 0
+    end = 0
     if len(sys.argv) == 2:
         if sys.argv[1].isdigit():
-            qty = int(sys.argv[1])
+            end = int(sys.argv[1])
         else:
             print("Usage: {} [qty[=all]".format(sys.argv[0]))
             exit()
-    walk(qty)
+    walk(end)
