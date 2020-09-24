@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
 """
-Get all blockchain addresses
+Get blockchain addresses.
+200k @ P4-3.0:  4239"
+100k @ i7-4790:  152"
+200k @ i7-4790: 2635"
 """
 
+import argparse
+import datetime
 import sys
+
 import btc.heap as heap
 from btc.authproxy import AuthServiceProxy as Proxy
 from btc.utils import load_conf, pk2addr, Timer, eprint
 
-Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
+Dup_Blocks = {91722, 91842}  # duplicate 91880, 91812
 Interim_Size = 1000
 
 
-def walk(qty: int = 0):
+def walk(beg: int, qty: int):
     rpc_connection = Proxy(load_conf(), timeout=300)  # for heavy load
-    bk_hash = rpc_connection.getblockhash(0)
     if qty == 0:
-        qty = rpc_connection.getblockcount()
+        end = rpc_connection.getblockcount()
+    else:
+        end = beg + qty
+    bk_hash = rpc_connection.getblockhash(beg)
     heap.timer = Timer()
     heap.timer.start()
     # 1. go
-    for bk_no in range(0, qty):
+    for bk_no in range(beg, end):
         bk = rpc_connection.getblock(bk_hash, 2)
+        bk_hash = bk['nextblockhash']
         if bk_no in Dup_Blocks:
             continue
         tx_no = 0
@@ -41,18 +50,31 @@ def walk(qty: int = 0):
                 else:
                     print(pfx)
             tx_no += 1
-        bk_hash = bk['nextblockhash']
         if not ((bk_no+1) % Interim_Size):
             eprint("{}\t{}".format(int((bk_no+1)/1000), heap.timer.now()))
     eprint("{}:\t{}".format(int((bk_no + 1)), heap.timer.now()))
 
 
+def init_cli():
+    """ Handle CLI """
+    parser = argparse.ArgumentParser(description='Export addresses.')
+    parser.add_argument('-f', '--from', dest='beg', metavar='n', type=int, nargs='?', default=0,
+                        help='Bk start from (default=0)')
+    parser.add_argument('-q', '--qty', metavar='n', type=int, nargs='?', default=0,
+                        help='Bk to process (default=all)')
+    parser.add_argument('-l', '--log', action='store_true',
+                        help='Logfile (default=false)')
+    return parser
+
+
+def main():
+    parser = init_cli()
+    args = parser.parse_args()
+    if args.log:
+        heap.Opts.log = True
+        heap.logfile = open("%s.log" % datetime.datetime.now().strftime('%y%m%d%H%M%S'), 'wt')
+    walk(args.beg, args.qty)
+
+
 if __name__ == '__main__':
-    end = 0
-    if len(sys.argv) == 2:
-        if sys.argv[1].isdigit():
-            end = int(sys.argv[1])
-        else:
-            print("Usage: {} [qty[=all]".format(sys.argv[0]))
-            exit()
-    walk(end)
+    main()
