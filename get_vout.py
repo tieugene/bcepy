@@ -7,7 +7,7 @@ External check: https://blockchain.info/rawtx/$tx_hash
 import json
 import sys
 
-import requests
+from urllib import request
 
 from btc.authproxy import AuthServiceProxy as Proxy
 from btc.utils import load_conf
@@ -24,16 +24,26 @@ def walk(bk_no: int, tx_no: int, vout_no: int):
             txid = tx['txid']
             vouts = tx['vout']
             if vout_no < len(vouts):
-                vout = vouts[vout_no]
-                print("My:")
-                print("\tS:\t{}".format(vout['hex']))
-                print("\tT:\t{}".format(vout['type']))
-                if 'addresses' in vout:
-                    print("\tA:\t{}".format(json.dumps(vout['hex'])))
-                # ext: ['out']['script, type, addr
-                r = requests.get('https://blockchain.info/rawtx/')
-                print(r.status_code)
-                print(r.json())
+                script = vouts[vout_no]['scriptPubKey']
+                # print(json.dumps(script, indent=1))
+                print("S: {}".format(script['hex']))
+                print("T: {}".format(script['type']))
+                addrs = script.get('addresses', None)
+                if addrs:
+                    print("A: {}".format(','.join(addrs)))
+            # ext: ['out']['script, type, addr
+            # extra source
+            print("E: ", end='')
+            with request.urlopen('https://blockchain.info/rawtx/' + txid) as f:
+                s = f.read().decode('utf-8')
+                tx = json.loads(s)
+                vout = tx['out'][vout_no]
+                ## print(json.dumps(vout, indent=1))
+                # print("\tS:\t{}".format(vout['script']))
+                # print("\tT:\t{}".format(vout['type']))
+                print(vout.get('addr', '---'), end='')
+            print()
+
 
 def main():
     argv = sys.argv
