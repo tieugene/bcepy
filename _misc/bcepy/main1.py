@@ -39,7 +39,6 @@ def walk(kbeg: int, kty: int, v: bool):
     # 0. prepare
     bk_no = kbeg
     bk_to = bk_no + (kty * Bulk_Size)
-    bk_to = 1
     size = 0
     txs = 0
     ins = 0

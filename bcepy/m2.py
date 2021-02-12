@@ -26,6 +26,7 @@ def prepare(kbeg: int) -> bool:
      +  N   1+  err ("set -f")
      +  0   1+  ok (+clear)
      x! 1+  1+  ok
+    :param kbeg: begining kbk
     :return: True if ok
     """
     global Tx, Addr
