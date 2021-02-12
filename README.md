@@ -2,7 +2,7 @@
 
 Exports BTC blockchain into PostgreSQL.
 
-## Requires
+## 1. Requires
 
 - bitcoind
 - postgresql-server
@@ -12,7 +12,7 @@ Exports BTC blockchain into PostgreSQL.
 - python3-kyotocabinet or python3-redis
 - python3-ujson (optionaly)
 
-## Who's who
+## 2. Who's who
 
 - bce1.py: walks through bitcoind and count txs, vouts, vins
 - bce2.py: bce1 + export to SQL
@@ -23,7 +23,7 @@ Exports BTC blockchain into PostgreSQL.
   - db_ctl.sh: converts bce*.py results into SQL loadable data
   - join\_io.py: used by db_ctl.sh to merge transaction vouts and vins
 
-## Explanation
+## 3. Explanation
 
 Storing blocks/transactions/addresses hashes in data table dircectly makes it extreme huge.
 The solution is to use block/tx/address order numbers (#).
@@ -43,7 +43,7 @@ Process of bitcoind=>PostgreSQL conversion goes through next steps:
 5. Export data into flat text ready to load into SQL DB
 6. Load those data into PostreSQL using `COPY` statements
 
-## Usage
+## 4. Usage
 
 ### bce1.py
 
@@ -59,11 +59,10 @@ The same as bce1.py (`-m 0|1` option) but generates interim flat text for furthe
 Next and last step - prepare this interim text and load into PostgreSQL using utils/db_ctl.sh (steps 4..6).
 db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see [db\_ctl.cfg sample](doc/db_ctl.cfg.sample)).
 
-## Installation
+## 5. Installation
 
 - [bitcoind](doc/bitcoind.md)
 - [PostgreSQL](doc/postgresql.md)
-- [Redis](doc/redis.md) (optional)
 - free space for (2020-09-01):
   - blockchain (~350GB+)
   - PostgreSQL database (~&frac12; blockchain)
@@ -71,3 +70,16 @@ db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see
   - key-value storage (~&frac14; blockchain)
   - temporary `sort` files (&infin;)
 - this package
+
+## Input
+- block location file ({fileno:uint32, offset:uint32) for each block}
+- blockchain directory (with blkXXXXX.dat files)
+
+## Output
+Plaintext with records:
+
+- `b	id		'datetime'	'hash'`
+- `t	id		b.id		hash`
+- `i	<t.id	vout		t.id`
+- `o	t.id	vout		$		[a.id]`
+- `a	id		"addr"		qty`
