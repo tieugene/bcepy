@@ -1,11 +1,10 @@
 # bcepy - BitCoin Export (Python)
 
-Exports BTC blockchain into PostgreSQL.
+Exports BTC blockchain into SQL DB loadable data.
 
 ## 1. Requires
 
 - bitcoind
-- postgresql-server
 - python3
 - python3-configobj
 - python3-base58
@@ -19,29 +18,15 @@ Exports BTC blockchain into PostgreSQL.
 - bce3?.py: 2-part version of bce2:
   - bce31.py: get data from bitcoin into interim json files
   - bce32.py: export bce31.py results into interim txt files
-- utils/:
-  - db_ctl.sh: converts bce*.py results into SQL loadable data
-  - join\_io.py: used by db_ctl.sh to merge transaction vouts and vins
 
 ## 3. Explanation
 
-Storing blocks/transactions/addresses hashes in data table dircectly makes it extreme huge.
-The solution is to use block/tx/address order numbers (#).
-Target PostgreSQL DB consists from tables (see [db structure](doc/db.svg)):
-
-1. blocks (#, datetime)
-2. transactions (#, hash)
-3. data (transaction vouts and vins)
-4. addresses (#, hash)
-
-Process of bitcoind=>PostgreSQL conversion goes through next steps:
-
-1. Get data from bitcoind as json responses.
-2. Load into inmemory structures
-3. Calculate block/tx/address #s using external key-value storage
-4. Merge vouts and vins
-5. Export data into flat text ready to load into SQL DB
-6. Load those data into PostreSQL using `COPY` statements
+Storing blocks/transactions/addresses in SQL DB with their hashes as primary keys makes DBs extreme huge.
+The solution is to use block/tx/address order numbers.
+This application:
+- get blocks from bitcoind
+- enumerates them using key-value storage
+- and exports results in compact text representation, ready to load into SQLn DB.
 
 ## 4. Usage
 
@@ -62,13 +47,10 @@ db\_ctl.sh uses .db\_ctl.cfg in the same directory for connecting to SQL DB (see
 ## 5. Installation
 
 - [bitcoind](doc/bitcoind.md)
-- [PostgreSQL](doc/postgresql.md)
 - free space for (2020-09-01):
   - blockchain (~350GB+)
-  - PostgreSQL database (~&frac12; blockchain)
   - interim bce2.py data (~&frac14; blockchain)
   - key-value storage (~&frac14; blockchain)
-  - temporary `sort` files (&infin;)
 - this package
 
 ## Input

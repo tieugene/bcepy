@@ -1,24 +1,29 @@
 # Bitcoind
 
-- distro: Fedora 32
+Setting up bitcoind server and client.
+
+- distro: Fedora 33
 - blockchain path: $BCPATH
 - bitcoind rpc user: $RPCUSER
 - bitcoind rpc password: $RPCPASS
 
-## 1. install packages
+## 1. Server
+
+### 1.1. Install packages:
 
 ```bash
-sudo dnf localinstall bitcoin-server bitcoin-utils
+sudo dnf install bitcoin-server
 ```
 
-## 2. configure server
+### 1.2. Configure:
 
 - /etc/sysconfig/bitcoin:
 
 ```diff
-+OPTIONS="-txindex=1"
 -DATA_DIR="/var/lib/bitcoin"
-+DATA_DIR="/mnt/sdb2/bitcoin"
++DATA_DIR="/mnt/my_big_and_fastest_drive/bitcoin"
++# next line is optional
++OPTIONS="-txindex=1"
 ```
 
 - /etc/bitcoin/bitcoin.conf:
@@ -47,22 +52,39 @@ sudo mkdir -p $BCPATH
 sudo chown -R bitcoin:bitcoin $BCPATH
 ```
 
-- run server:
+### 1.3. Run:
 
 ```bash
 sudo systemctl enable --now bitcoin
 ```
 
-## 3. configure client
+### 1.4. Check
 
-~/.bitcoin/bitcoin.conf
+```bash
+sudo tail -f /var/log/bitcoin/debug.log
+```
+
+## 2. Client
+
+### 2.1. Install packages
+
+```bash
+sudo dnf install bitcoin-utils
+```
+
+### 2.2. Configure:
+
+~/.bitcoin/bitcoin.conf:
+(_)
 
 ```
 rpcuser=$RPCUSER
 rpcpassword=$RPCUSER
+# next line optional
+
 ```
 
-- check client:
+### 2.3. Check:
 
 ```bash
 bitcoin-cli help
