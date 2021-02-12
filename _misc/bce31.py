@@ -1,7 +1,10 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 """
+- bce3?.py: 2-part version of bce2:
+  - bce31.py: get data from bitcoin into interim json files
+  - bce32.py: export bce31.py results into interim txt files
+
 Export bitcoind data to gziped jsons.
-3rd parties: None
 
 Usage:
 - [-f, -q, -l]: count txs using short bitcoind reply
@@ -13,7 +16,7 @@ time (kbk, macbook, wifi):
 100 718 (60=>396MB)
 """
 
-from btc.main31 import main
+from bcepy.main31 import main
 
 if __name__ == "__main__":
     main()

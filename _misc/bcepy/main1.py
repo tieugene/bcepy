@@ -1,19 +1,15 @@
 #!/bin/env python3
 """
-Counts all blocks, transactions[, vins, vouts]
-3rd parties:
-- python3-configobj
-- [python3-ujson]
+Counts all blocks, transactions[, vins, vouts].
+(simplified bce2.py -m 0..1
 """
-
-import sys
+# 1. system
 import argparse
 import datetime
-import os
-import platform
 import time
-from configobj import ConfigObj
-from btc.authproxy import AuthServiceProxy as Proxy
+# 2. local
+from .authproxy import AuthServiceProxy as Proxy
+from .utils import load_conf, eprint
 
 Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
@@ -33,40 +29,12 @@ tpl = (
 )
 
 
-def eprint(s: str):
-    """ Print log to stderr [and logfile] """
-    global logfile
-    print(s, file=sys.stderr)
-    if logfile:
-        print(s, file=logfile)
-        logfile.flush()
-
-
-def load_cfg() -> object:
-    if platform.system() == 'Darwin':
-        btc_conf_file = os.path.expanduser('~/Library/Application Support/Bitcoin/')
-    elif platform.system() == 'Windows':
-        btc_conf_file = os.path.join(os.environ['APPDATA'], 'Bitcoin')
-    else:
-        btc_conf_file = os.path.expanduser('~/.bitcoin')
-    btc_conf_file = os.path.join(btc_conf_file, 'bitcoin.conf')
-    if not os.path.exists(btc_conf_file):
-        raise Exception("Can't find '{}'".format(btc_conf_file))
-    cfg = ConfigObj(btc_conf_file)
-    if ('rpcuser' not in cfg) or ('rpcpassword' not in cfg):
-        raise Exception("Not 'rpcuser' or 'rpcpassword' in bitcoin.conf")
-    if 'rpcconnect' not in cfg:
-        cfg['rpcconnect'] = 'localhost'
-    if 'rpcport' not in cfg:
-        cfg['rpcport'] = '8332'
-    return cfg
-
-
 def walk(kbeg: int, kty: int, v: bool):
     """
     Main loop
-    @param kbeg: 1st Kblock
-    @param kty: Kblocks to process
+    :param kbeg: 1st Kblock
+    :param kty: Kblocks to process
+    :param v: verbosity
     """
     # 0. prepare
     bk_no = kbeg
@@ -75,7 +43,7 @@ def walk(kbeg: int, kty: int, v: bool):
     txs = 0
     ins = 0
     outs = 0
-    cfg = load_cfg()
+    cfg = load_conf()
     url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
     rpc_connection = Proxy(url, timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(bk_no)

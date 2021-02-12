@@ -2,17 +2,18 @@
 m2: Process (inmem).
 inmem tx.id, addr.id storage
 """
-
-import datetime, os
+# 1. system
+import datetime
 import json
-
-import btc.heap as heap
-from btc.utils import snow, pk2addr, eprint
+import os
+# 2. local
+from . import heap
+from .utils import snow, pk2addr, eprint, Memer
 
 Tx = None
 Addr = None
 
-__line = "===\t=======\t=======\t=======\t=======\t====="
+__line = "===\t=======\t=======\t=======\t=======\t=======\t======="
 
 
 def prepare(kbeg: int) -> bool:
@@ -25,102 +26,105 @@ def prepare(kbeg: int) -> bool:
      +  N   1+  err ("set -f")
      +  0   1+  ok (+clear)
      x! 1+  1+  ok
+    :param kbeg: begining kbk
     :return: True if ok
-    """
-    global Tx, Addr
-    if heap.Opts.kvdir: # defined => kyotocabinet
-        from btc.kv.kc import KV
-        Tx = KV()
-        Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
-        Addr = KV()
-        Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
-    else:               # redis
-        from btc.kv.rds import KV
+    redis:
+        from .kv.rds import KV
         Tx = KV()
         Tx.open(0)
         Addr = KV()
         Addr.open(1)
+    """
+    global Tx, Addr
+    if heap.Opts.kvdir:  # defined => kyotocabinet
+        from .kv.kc import KV
+        Tx = KV()
+        Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
+        Addr = KV()
+        Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
+    else:               # inmem
+        from .kv.inmem import KV
+        Tx = KV()
+        Addr = KV()
     tx_count = Tx.get_count()
-    if (tx_count):
-        if (kbeg is None):
+    if tx_count:
+        if kbeg is None:
             eprint("Error: Tx is not empty ({} items). Set -f option.".format(tx_count))
             return True
-        if (kbeg == 0):
+        if kbeg == 0:
             Tx.clean()
             Addr.clean()
     else:
         if kbeg:
             eprint("Error: Tx is empty. Use '-f 0' or skip it.")
             return True
-    # heap.memer = Memer()
-    # heap.memer.start()
+    heap.memer = Memer()
+    heap.memer.start()
 
 
 def prn_head():
-    return "kBk\tTx\tIn\tOut\tAddr\tTime\t%s (m2)\n%s" % (snow(), __line)
+    return "kBk\tTx\tIn\tOut\tAddr\tRAM,M\tTime,s\t{} (m2)\n{}".format(snow(), __line)
 
 
 def prn_interim():
-    return "%03d\t%d\t%d\t%d\t%d\t%d" % (
+    return "{:03d}\t{}\t{}\t{}\t{}\t{}\t{}".format(
         heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
-        heap.timer.now())
+        heap.memer.now(), heap.timer.now())
 
 
 def prn_tail():
-    return "%s\n%03d\t%d\t%d\t%d\t%d\t%d\t%s\nMax tx/bk:\t%d\nMax in/tx:\t%d\nMax out/tx:\t%d\nMax addr/out:\t%d" % \
-           (__line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
-            heap.addr_count, heap.timer.now(), snow(),
+    return "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}".format(
+           __line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
+            heap.addr_count, heap.memer.now(), heap.timer.now(), snow(),
             heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
 
 
 def __out_bk(bk_no: int, ts: int, hsh: str):
     if heap.Opts.out:
-        print("b\t%d\t'%s'\t'%s'" % (bk_no, datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S"), hsh))
+        print("b\t{}\t'{}'\t'{}'".format(bk_no, datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S"), hsh))
 
 
 def __out_tx(tx_no: int, bk_no: int, hsh: str):
     if heap.Opts.out:
-        print("t\t%d\t%d\t%s" % (tx_no, bk_no, hsh))
+        print("t\t{}\t{}\t{}".format(tx_no, bk_no, hsh))
 
 
 def __out_vin(out_no: int, out_n: int, in_no: int):
     if heap.Opts.out:
-        print("i\t%d\t%d\t%d" % (out_no, out_n, in_no))
+        print("i\t{}\t{}\t{}".format(out_no, out_n, in_no))
 
 
 def __out_addr(addr_no: int, lst: list):
     if heap.Opts.out:
         if len(lst) == 1:
             s = '"%s"' % lst[0]
-            n = 1
         else:
             s = json.dumps(lst)
-            n = len(s)
-        print("a\t%d\t%s\t%d" % (addr_no, s, n))
+        print("a\t{}\t{}\t{}".format(addr_no, s, len(lst)))
 
 
 def __out_vout(tx_no: int, n: int, satoshi: int, addr: int):
     if heap.Opts.out:
-        print("o\t%d\t%d\t%d\t%s" % (tx_no, n, satoshi, '\\N' if addr is None else str(addr)))
+        print("o\t{}\t{}\t{}\t{}".format(tx_no, n, satoshi, '\\N' if addr is None else str(addr)))
 
 
 def work_bk(bk):
-    nTx = len(bk['tx']) # bk['nTx']
+    tx_qty = len(bk['tx'])  # bk['nTx']
     # heap.bk_vol += bk['size']
-    heap.tx_count += nTx
-    heap.max_bk_tx = max(heap.max_bk_tx, nTx)
+    heap.tx_count += tx_qty
+    heap.max_bk_tx = max(heap.max_bk_tx, tx_qty)
     # 1. bk
     __out_bk(heap.bk_no, int(bk['time']), bk['hash'])
     if heap.bk_no in heap.Dup_Blocks:
         return
     for tx in bk['tx']:
         # misc statistics
-        nIn = len(tx['vin'])
-        heap.in_count += nIn
-        heap.max_tx_in = max(heap.max_tx_in, nIn)
-        nOut = len(tx['vout'])
-        heap.out_count += nOut
-        heap.max_tx_out = max(heap.max_tx_out, nOut)
+        vin_qty = len(tx['vin'])
+        heap.in_count += vin_qty
+        heap.max_tx_in = max(heap.max_tx_in, vin_qty)
+        vout_qty = len(tx['vout'])
+        heap.out_count += vout_qty
+        heap.max_tx_out = max(heap.max_tx_out, vout_qty)
         # 2. tx
         tx_hash_s = tx["txid"]  # str repr
         tx_hash_b = bytes.fromhex(tx_hash_s)
@@ -132,10 +136,10 @@ def work_bk(bk):
                 continue
             vout_hash = bytes.fromhex(vin['txid'])
             vout_no = Tx.get(vout_hash)  # FIXME: strict get
-            assert vout_no is not None, "bk=%d, tx '%s', vin # %d: vout '%s' not exists" % \
-                                        (heap.bk_no, tx_hash_s, vin_n, vout_hash.hex())
+            assert vout_no is not None, "bk={}, tx '{}', vin # {}: vout '{}' not exists".format(
+                heap.bk_no, tx_hash_s, vin_n, vout_hash.hex())
             __out_vin(vout_no, vin['vout'], tx_no)
-        for vout in tx["vout"]:
+        for vout in tx['vout']:
             # FIXME: assert vout.n <= len(tx.vout)
             # 4. addresses
             spk = vout["scriptPubKey"]
@@ -160,4 +164,4 @@ def work_bk(bk):
             # 5. vout
             # satosh = (value < -0.0) ? (int64_t) (BC_SPB * value - 0.5) : (int64_t) (BC_SPB * value + 0.5);
             # sql.add_vout(tx_no, vout["n"], int(vout["value"] * 100000000), addr_no)
-            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)
+            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)   # FIXME: float

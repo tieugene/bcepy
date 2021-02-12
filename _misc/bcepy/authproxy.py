@@ -43,7 +43,6 @@ try:
 except ImportError:
     import httplib
 import base64
-import decimal
 try:
     import ujson as json
 except ImportError:
