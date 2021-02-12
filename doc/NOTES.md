@@ -238,3 +238,11 @@ m2 chk kbeg vs kv.size:
   - 167579 ['1NiA6V8Ges2vEkSx11X5oo2aCyTsCv3XH3', '18am8jUnBqru2jtQpQbE4LCywBWUPUooP1', '1Fr1wwdwoNH3F7zFAvcWJte5vsacto3EXC']
   - 170741 ['1VayNert3x1KzbpzMGt2qdqrAThiRovi8', '1VayNert3x1KzbpzMGt2qdqrAThiRovi8']
   - 170766 ['1VayNert3x1KzbpzMGt2qdqrAThiRovi8', '1VayNert3x1KzbpzMGt2qdqrAThiRovi8']
+
+## 20210212:
+Desktop bench:
+- 165k:
+  - kc: 30'
+  - mem: 1774", 914M, 2329735 tx, 2966388 addr
+- 150k:
+  - mem: 1369", 700MB, 1718397 tx, 2337716 addr

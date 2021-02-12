@@ -18,7 +18,7 @@ def __init_cli():
     # parser.add_argument('-k', '--keep', action='store_true', help='Keep existing Tx/Addr (default=false)')
     parser.add_argument('-l', '--log', action='store_true', help='Logfile (default=false)')
     parser.add_argument('-o', '--out', action='store_true', help='DB output (default=false)')
-    parser.add_argument('-c', '--cache', type=str, metavar='dir', nargs='?', default=".", help='Cache dir (default=.)')
+    parser.add_argument('-c', '--cache', type=str, metavar='dir', nargs='?', help='Cache dir (default=RAM)')
     return parser
 
 

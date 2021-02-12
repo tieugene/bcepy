@@ -5,17 +5,12 @@ import time
 import datetime
 import itertools
 import platform
+import resource
 import hashlib
-from pathlib import Path
-from resource import getpagesize
 import configparser
 # 2. local
 from . import base58
 from . import heap
-
-# consts
-PAGESIZE = getpagesize()
-PATH = Path('/proc/self/statm')
 
 
 def snow() -> str:
@@ -78,22 +73,23 @@ class Timer(object):
 
 
 class Memer(object):
+    __m0 = 0
+
     @staticmethod
     def get_used_mem() -> int:
-        """Return the current resident set size in bytes."""
-        # statm columns are: size resident shared text lib data dt
-        __statm = PATH.read_text()
-        __fields = __statm.split()
-        return (int(__fields[1]) * PAGESIZE) >> 20
-
-    def __init__(self):
-        self.__m0 = 0
+        """
+        Return the current resident set size in Kbytes.
+        Another way: (pagesize == 4k for lin/mac)
+        return (int(Path('/proc/self/statm').read_text().split()[1]) * resource.getpagesize()) >> 20
+        """
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
     def start(self):
         self.__m0 = self.get_used_mem()
 
     def now(self) -> int:
-        return self.get_used_mem() - self.__m0
+        """Return RAM usage from start(), MB"""
+        return (self.get_used_mem() - self.__m0) >> 10
 
 
 def pk2addr(s: str) -> str:

@@ -13,7 +13,7 @@ from .utils import snow, pk2addr, eprint, Memer
 Tx = None
 Addr = None
 
-__line = "===\t=======\t=======\t=======\t=======\t====="
+__line = "===\t=======\t=======\t=======\t=======\t=======\t======="
 
 
 def prepare(kbeg: int) -> bool:
@@ -28,6 +28,12 @@ def prepare(kbeg: int) -> bool:
      x! 1+  1+  ok
     :param kbeg: begining kbk
     :return: True if ok
+    redis:
+        from .kv.rds import KV
+        Tx = KV()
+        Tx.open(0)
+        Addr = KV()
+        Addr.open(1)
     """
     global Tx, Addr
     if heap.Opts.kvdir:  # defined => kyotocabinet
@@ -36,12 +42,10 @@ def prepare(kbeg: int) -> bool:
         Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
         Addr = KV()
         Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
-    else:               # redis
-        from .kv.rds import KV
+    else:               # inmem
+        from .kv.inmem import KV
         Tx = KV()
-        Tx.open(0)
         Addr = KV()
-        Addr.open(1)
     tx_count = Tx.get_count()
     if tx_count:
         if kbeg is None:
@@ -59,19 +63,19 @@ def prepare(kbeg: int) -> bool:
 
 
 def prn_head():
-    return "kBk\tTx\tIn\tOut\tAddr\tTime\t{} (m2)\n{}".format(snow(), __line)
+    return "kBk\tTx\tIn\tOut\tAddr\tRAM,M\tTime,s\t{} (m2)\n{}".format(snow(), __line)
 
 
 def prn_interim():
-    return "{:03d}\t{}\t{}\t{}\t{}\t{}".format(
+    return "{:03d}\t{}\t{}\t{}\t{}\t{}\t{}".format(
         heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
-        heap.timer.now())
+        heap.memer.now(), heap.timer.now())
 
 
 def prn_tail():
-    return "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}".format(
+    return "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}".format(
            __line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
-            heap.addr_count, heap.timer.now(), snow(),
+            heap.addr_count, heap.memer.now(), heap.timer.now(), snow(),
             heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
 
 
@@ -132,10 +136,10 @@ def work_bk(bk):
                 continue
             vout_hash = bytes.fromhex(vin['txid'])
             vout_no = Tx.get(vout_hash)  # FIXME: strict get
-            assert vout_no is not None, "bk=%d, tx '%s', vin # %d: vout '%s' not exists" % \
-                                        (heap.bk_no, tx_hash_s, vin_n, vout_hash.hex())
+            assert vout_no is not None, "bk={}, tx '{}', vin # {}: vout '{}' not exists".format(
+                heap.bk_no, tx_hash_s, vin_n, vout_hash.hex())
             __out_vin(vout_no, vin['vout'], tx_no)
-        for vout in tx["vout"]:
+        for vout in tx['vout']:
             # FIXME: assert vout.n <= len(tx.vout)
             # 4. addresses
             spk = vout["scriptPubKey"]
