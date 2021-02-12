@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 """
 Process bitcoind gziped jsons into SQL-ready data.
 3rd parties:

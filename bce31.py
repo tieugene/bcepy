@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 """
 Export bitcoind data to gziped jsons.
 3rd parties: None

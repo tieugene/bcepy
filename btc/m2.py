@@ -2,12 +2,13 @@
 m2: Process (inmem).
 inmem tx.id, addr.id storage
 """
-
-import datetime, os
+# 1. system
+import datetime
 import json
-
-import btc.heap as heap
-from btc.utils import snow, pk2addr, eprint
+import os
+# 2. local
+from . import heap
+from .utils import snow, pk2addr, eprint
 
 Tx = None
 Addr = None
@@ -28,7 +29,7 @@ def prepare(kbeg: int) -> bool:
     :return: True if ok
     """
     global Tx, Addr
-    if heap.Opts.kvdir: # defined => kyotocabinet
+    if heap.Opts.kvdir:  # defined => kyotocabinet
         from btc.kv.kc import KV
         Tx = KV()
         Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
@@ -41,11 +42,11 @@ def prepare(kbeg: int) -> bool:
         Addr = KV()
         Addr.open(1)
     tx_count = Tx.get_count()
-    if (tx_count):
-        if (kbeg is None):
+    if tx_count:
+        if kbeg is None:
             eprint("Error: Tx is not empty ({} items). Set -f option.".format(tx_count))
             return True
-        if (kbeg == 0):
+        if kbeg == 0:
             Tx.clean()
             Addr.clean()
     else:
@@ -105,22 +106,22 @@ def __out_vout(tx_no: int, n: int, satoshi: int, addr: int):
 
 
 def work_bk(bk):
-    nTx = len(bk['tx']) # bk['nTx']
+    tx_qty = len(bk['tx'])  # bk['nTx']
     # heap.bk_vol += bk['size']
-    heap.tx_count += nTx
-    heap.max_bk_tx = max(heap.max_bk_tx, nTx)
+    heap.tx_count += tx_qty
+    heap.max_bk_tx = max(heap.max_bk_tx, tx_qty)
     # 1. bk
     __out_bk(heap.bk_no, int(bk['time']), bk['hash'])
     if heap.bk_no in heap.Dup_Blocks:
         return
     for tx in bk['tx']:
         # misc statistics
-        nIn = len(tx['vin'])
-        heap.in_count += nIn
-        heap.max_tx_in = max(heap.max_tx_in, nIn)
-        nOut = len(tx['vout'])
-        heap.out_count += nOut
-        heap.max_tx_out = max(heap.max_tx_out, nOut)
+        vin_qty = len(tx['vin'])
+        heap.in_count += vin_qty
+        heap.max_tx_in = max(heap.max_tx_in, vin_qty)
+        vout_qty = len(tx['vout'])
+        heap.out_count += vout_qty
+        heap.max_tx_out = max(heap.max_tx_out, vout_qty)
         # 2. tx
         tx_hash_s = tx["txid"]  # str repr
         tx_hash_b = bytes.fromhex(tx_hash_s)

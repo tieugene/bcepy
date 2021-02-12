@@ -2,14 +2,14 @@
 m0: Just walk.
 (+txs, +bk_sizes)
 """
-
-from btc.utils import snow
-import btc.heap as heap
+# 2. local
+from .utils import snow
+from . import heap
 
 __line = "===\t=======\t=======\t====="
 
 
-def prepare(kbeg: int):
+def prepare(_):
     pass
 
 
@@ -31,6 +31,6 @@ def work_bk(bk):
     heap.bk_vol += bk['size']
     if heap.bk_no in heap.Dup_Blocks:
         return
-    nTx = bk['nTx']
-    heap.tx_count += nTx
-    heap.max_bk_tx = max(heap.max_bk_tx, nTx)
+    tx_qty = bk['nTx']
+    heap.tx_count += tx_qty
+    heap.max_bk_tx = max(heap.max_bk_tx, tx_qty)

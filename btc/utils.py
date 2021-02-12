@@ -1,21 +1,26 @@
+# 1. system
 import os
 import sys
 import time
 import datetime
+import itertools
 import platform
 import hashlib
-import base58
 from pathlib import Path
 from resource import getpagesize
-from configobj import ConfigObj
-import btc.heap as heap
+import configparser
+# 2. local
+from . import base58
+from . import heap
 
 PAGESIZE = getpagesize()
 PATH = Path('/proc/self/statm')
 
 
 def snow() -> str:
-    """ String repr of current datetime """
+    """
+    String repr of current datetime
+    """
     return datetime.datetime.now().strftime('%y.%m.%d %H:%M:%S')
 
 
@@ -27,7 +32,7 @@ def eprint(s: str):
         heap.logfile.flush()
 
 
-def load_conf(btc_conf_file: str = None) -> str:
+def load_conf(btc_conf_file: str = None) -> dict:
     """
     Load bitcoin.conf.
     @param btc_conf_file
@@ -44,15 +49,21 @@ def load_conf(btc_conf_file: str = None) -> str:
         btc_conf_file = os.path.join(btc_conf_file, 'bitcoin.conf')
     if not os.path.exists(btc_conf_file):
         raise Exception("Can't find '{}'".format(btc_conf_file))
-    cfg = ConfigObj(btc_conf_file)
+    # cfg = ConfigObj(btc_conf_file)
+    with open(btc_conf_file) as lines:
+        parser = configparser.ConfigParser()
+        lines = itertools.chain(("[dummy]",), lines)  # Just a trick
+        parser.read_file(lines)
+        cfg = dict(parser['dummy'])
     if ('rpcuser' not in cfg) or ('rpcpassword' not in cfg):
         raise Exception("Not 'rpcuser' or 'rpcpassword' in bitcoin.conf")
     if 'rpcconnect' not in cfg:
         cfg['rpcconnect'] = 'localhost'
     if 'rpcport' not in cfg:
         cfg['rpcport'] = '8332'
-    return ('http://{}:{}@{}:{}'.format(
-            cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport']))
+    return cfg
+    # return ('http://{}:{}@{}:{}'.format(
+    #    cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport']))
 
 
 class Timer(object):
@@ -67,7 +78,8 @@ class Timer(object):
 
 
 class Memer(object):
-    def get_used_mem(self) -> int:
+    @staticmethod
+    def get_used_mem() -> int:
         """Return the current resident set size in bytes."""
         # statm columns are: size resident shared text lib data dt
         __statm = PATH.read_text()
@@ -83,11 +95,12 @@ class Memer(object):
     def now(self) -> int:
         return self.get_used_mem() - self.__m0
 
+
 def pk2addr(s: str) -> str:
     """
-    Converts pubkey into base58 addr
+    Converts pubkey into representable addr
     @param s - pubkey string (130 chars)
-    @return base58 pubkey representation
+    @return pubkey representation
     """
-    r160 = b'\0'+hashlib.new('ripemd160', hashlib.sha256(bytes.fromhex(s)).digest()).digest()
+    r160 = b'\0' + hashlib.new('ripemd160', hashlib.sha256(bytes.fromhex(s)).digest()).digest()
     return base58.b58encode(r160 + hashlib.sha256(hashlib.sha256(r160).digest()).digest()[:4]).decode('ascii')

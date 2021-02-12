@@ -1,15 +1,15 @@
 """
 """
-
+# 1. system
 import argparse
 import datetime
 import json
 import os
 import pathlib
 import gzip
-
-import btc.heap as heap
-from btc.utils import load_conf, eprint, Timer
+# 2. local
+from . import heap
+from .utils import eprint, Timer
 
 
 def load_bk(no: int) -> dict:

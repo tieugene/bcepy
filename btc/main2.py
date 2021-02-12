@@ -6,14 +6,13 @@
 - 3 - +txout (tx.no:vout.n)
 """
 
+# 1. system
 import argparse
 import datetime
-
-from btc.authproxy import AuthServiceProxy as Proxy
-# from slickrpc import Proxy
-
-import btc.heap as heap
-from btc.utils import load_conf, eprint, Timer
+# 2. local
+from .authproxy import AuthServiceProxy as Proxy
+from .utils import load_conf, eprint, Timer
+from . import heap
 
 
 def walk(kbeg: int, kty: int):

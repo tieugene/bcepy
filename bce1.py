@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 """
 Counts all blocks, transactions[, vins, vouts]
 3rd parties:

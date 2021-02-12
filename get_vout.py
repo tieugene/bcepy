@@ -38,7 +38,7 @@ def walk(bk_no: int, tx_no: int, vout_no: int):
                 s = f.read().decode('utf-8')
                 tx = json.loads(s)
                 vout = tx['out'][vout_no]
-                ## print(json.dumps(vout, indent=1))
+                # print(json.dumps(vout, indent=1))
                 # print("\tS:\t{}".format(vout['script']))
                 # print("\tT:\t{}".format(vout['type']))
                 print(vout.get('addr', '---'), end='')

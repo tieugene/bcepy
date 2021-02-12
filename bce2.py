@@ -1,4 +1,4 @@
-#!/bin/env python3
+#!/usr/bin/env python3
 """
 Exports bitcoind data to sql-ready plaintext
 3rd parties:

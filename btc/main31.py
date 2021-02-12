@@ -6,21 +6,17 @@ time (kbk, macbook, wifi):
 1   4
 100 718 (60=>396MB)
 """
-
-import sys
+# 1. system
 import argparse
 import datetime
 import os
-import platform
 import time
 import gzip
 import pathlib
 import json
-# replacing configobj.ConfigObj:
-import configparser
-import itertools
-# from python-bitcoinrpc:
-from btc.authproxy import AuthServiceProxy as Proxy
+# 2. local
+from .authproxy import AuthServiceProxy as Proxy
+from .utils import load_conf, eprint
 
 # Dup_Blocks = {91722, 91812}  # duplicate 91880, 91842
 Bulk_Size = 1000
@@ -72,42 +68,6 @@ wanted_script = {
 }
 
 
-def eprint(s: str):
-    """ Print log to stderr [and logfile] """
-    global logfile
-    print(s, file=sys.stderr)
-    if logfile:
-        print(s, file=logfile)
-        logfile.flush()
-
-
-def load_cfg() -> dict:
-    if platform.system() == 'Darwin':
-        btc_conf_file = os.path.expanduser('~/Library/Application Support/Bitcoin/')
-    elif platform.system() == 'Windows':
-        btc_conf_file = os.path.join(os.environ['APPDATA'], 'Bitcoin')
-    else:
-        btc_conf_file = os.path.expanduser('~/.bitcoin')
-    btc_conf_file = os.path.join(btc_conf_file, 'bitcoin.conf')
-    if not os.path.exists(btc_conf_file):
-        raise Exception("Can't find '{}'".format(btc_conf_file))
-    # load cfg
-    # cfg = ConfigObj(btc_conf_file)
-    with open(btc_conf_file) as lines:
-        parser = configparser.ConfigParser()
-        lines = itertools.chain(("[dummy]",), lines)  # Just a trick
-        parser.read_file(lines)
-        cfg = dict(parser['dummy'])
-    # dispatch cfg
-    if ('rpcuser' not in cfg) or ('rpcpassword' not in cfg):
-        raise Exception("Not 'rpcuser' or 'rpcpassword' in bitcoin.conf")
-    if 'rpcconnect' not in cfg:
-        cfg['rpcconnect'] = 'localhost'
-    if 'rpcport' not in cfg:
-        cfg['rpcport'] = '8332'
-    return cfg
-
-
 def save_bk(bk: dict) -> bool:
     """
     Save block json as light and compressed file
@@ -155,8 +115,9 @@ def save_bk(bk: dict) -> bool:
 def walk(kbeg: int, kty: int, v: bool):
     """
     Main loop
-    @param kbeg: starting Kblock
-    @param kty: Kblocks to process
+    :param kbeg: starting Kblock
+    :param kty: Kblocks to process
+    :param v: verbosity
     """
     # 0. prepare
     bk_no = kbeg * Bulk_Size
@@ -165,7 +126,7 @@ def walk(kbeg: int, kty: int, v: bool):
     txs = 0
     ins = 0
     outs = 0
-    cfg = load_cfg()
+    cfg = load_conf()
     url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
     rpc_connection = Proxy(url, timeout=300)  # for heavy load
     bk_hash = rpc_connection.getblockhash(bk_no)
@@ -227,7 +188,7 @@ def main():
         if not args.verbose:
             eprint("'-o' option has no sense without -v")
             return
-        outdir = args.out.replace('~', str(pathlib.Path.home())) # macos trick
+        outdir = args.out.replace('~', str(pathlib.Path.home()))  # macos trick
         if not os.path.isdir(outdir):
             eprint("Output path '{}' is not directory or not exists.".format(outdir))
             return
