@@ -26,7 +26,7 @@ def walk(kbeg: int, kty: int):
     @param kbeg: 1st Kblock
     @param kty: Kblocks to process
     """
-    import btc.m2 as mode
+    from . import m2 as mode
     # 0. prepare
     if mode.prepare(kbeg):
         return

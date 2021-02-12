@@ -6,7 +6,7 @@ Process bitcoind gziped jsons into SQL-ready data.
 - python3-base58
 - [python3-ujson]
 """
-from btc.main32 import main
+from bcepy.main32 import main
 
 if __name__ == "__main__":
     main()

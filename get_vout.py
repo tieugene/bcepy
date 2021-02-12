@@ -9,8 +9,8 @@ import sys
 
 from urllib import request
 
-from btc.authproxy import AuthServiceProxy as Proxy
-from btc.utils import load_conf
+from bcepy.authproxy import AuthServiceProxy as Proxy
+from bcepy.utils import load_conf
 
 
 def walk(bk_no: int, tx_no: int, vout_no: int):

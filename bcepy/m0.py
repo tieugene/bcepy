@@ -1,5 +1,5 @@
 """
-m0: Just walk.
+m0: Simple walk.
 (+txs, +bk_sizes)
 """
 # 2. local
@@ -14,11 +14,12 @@ def prepare(_):
 
 
 def prn_head():
-    return "kBk\tSize\tTx\tTime\t%s (m0)\n%s" % (snow(), __line)
+    return "kBk\tSize\tTx\tTime\t{} (m0)\n{}".format(snow(), __line)
 
 
 def prn_interim():
-    return "%03d\t%d\t%d\t%d" % (heap.bk_no // heap.Bulk_Size, heap.bk_vol, heap.tx_count, heap.timer.now())
+    return "%03d\t%d\t%d\t%d" % (
+        heap.bk_no // heap.Bulk_Size, heap.bk_vol, heap.tx_count, heap.timer.now())
 
 
 def prn_tail():

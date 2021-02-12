@@ -30,13 +30,13 @@ def prepare(kbeg: int) -> bool:
     """
     global Tx, Addr
     if heap.Opts.kvdir:  # defined => kyotocabinet
-        from btc.kv.kc import KV
+        from .kv.kc import KV
         Tx = KV()
         Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
         Addr = KV()
         Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
     else:               # redis
-        from btc.kv.rds import KV
+        from .kv.rds import KV
         Tx = KV()
         Tx.open(0)
         Addr = KV()

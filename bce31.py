@@ -13,7 +13,7 @@ time (kbk, macbook, wifi):
 100 718 (60=>396MB)
 """
 
-from btc.main31 import main
+from bcepy.main31 import main
 
 if __name__ == "__main__":
     main()

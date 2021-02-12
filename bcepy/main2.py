@@ -1,5 +1,5 @@
 """
-8. All together.
+All together.
 - 0 - just walk (+bk_size, +txs)
 - 1 - +vins,+vouts
 - 2 - +store (file) txs (tx.id:no), addrs; gen data
@@ -22,19 +22,22 @@ def walk(kbeg: int, kty: int):
     @param kty: Kblocks to process
     """
     if heap.Opts.mode == 0:
-        import btc.m0 as mode
+        from . import m0 as mode
     elif heap.Opts.mode == 1:
-        import btc.m1 as mode
+        from . import m1 as mode
     else:
-        import btc.m2 as mode
+        from . import m2 as mode
     # 0. prepare
-    rpc_connection = Proxy(load_conf(), timeout=300)  # for heavy load
+    cfg = load_conf()
+    url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
+    rpc_connection = Proxy(url, timeout=300)  # for heavy load
     if mode.prepare(kbeg):
         return
     if kbeg is None:
         kbeg = 0
     heap.bk_no = kbeg * heap.Bulk_Size
     bk_to = heap.bk_no + (kty * heap.Bulk_Size)
+    bk_to = 1
     bk_hash = rpc_connection.getblockhash(heap.bk_no)
     heap.timer = Timer()
     # 1. go

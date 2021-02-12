@@ -1,8 +1,7 @@
 #!/bin/env python3
 """
-Counts all blocks, transactions[, vins, vouts]
-3rd parties:
-- [python3-ujson]
+Counts all blocks, transactions[, vins, vouts].
+(simplified bce2.py -m 0..1
 """
 # 1. system
 import argparse
@@ -40,6 +39,7 @@ def walk(kbeg: int, kty: int, v: bool):
     # 0. prepare
     bk_no = kbeg
     bk_to = bk_no + (kty * Bulk_Size)
+    bk_to = 1
     size = 0
     txs = 0
     ins = 0
