@@ -8,7 +8,7 @@ import json
 import os
 # 2. local
 from . import heap
-from .utils import snow, pk2addr, eprint
+from .utils import snow, pk2addr, eprint, Memer
 
 Tx = None
 Addr = None
@@ -54,56 +54,54 @@ def prepare(kbeg: int) -> bool:
         if kbeg:
             eprint("Error: Tx is empty. Use '-f 0' or skip it.")
             return True
-    # heap.memer = Memer()
-    # heap.memer.start()
+    heap.memer = Memer()
+    heap.memer.start()
 
 
 def prn_head():
-    return "kBk\tTx\tIn\tOut\tAddr\tTime\t%s (m2)\n%s" % (snow(), __line)
+    return "kBk\tTx\tIn\tOut\tAddr\tTime\t{} (m2)\n{}".format(snow(), __line)
 
 
 def prn_interim():
-    return "%03d\t%d\t%d\t%d\t%d\t%d" % (
+    return "{:03d}\t{}\t{}\t{}\t{}\t{}".format(
         heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
         heap.timer.now())
 
 
 def prn_tail():
-    return "%s\n%03d\t%d\t%d\t%d\t%d\t%d\t%s\nMax tx/bk:\t%d\nMax in/tx:\t%d\nMax out/tx:\t%d\nMax addr/out:\t%d" % \
-           (__line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
+    return "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}".format(
+           __line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
             heap.addr_count, heap.timer.now(), snow(),
             heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
 
 
 def __out_bk(bk_no: int, ts: int, hsh: str):
     if heap.Opts.out:
-        print("b\t%d\t'%s'\t'%s'" % (bk_no, datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S"), hsh))
+        print("b\t{}\t'{}'\t'{}'".format(bk_no, datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S"), hsh))
 
 
 def __out_tx(tx_no: int, bk_no: int, hsh: str):
     if heap.Opts.out:
-        print("t\t%d\t%d\t%s" % (tx_no, bk_no, hsh))
+        print("t\t{}\t{}\t{}".format(tx_no, bk_no, hsh))
 
 
 def __out_vin(out_no: int, out_n: int, in_no: int):
     if heap.Opts.out:
-        print("i\t%d\t%d\t%d" % (out_no, out_n, in_no))
+        print("i\t{}\t{}\t{}".format(out_no, out_n, in_no))
 
 
 def __out_addr(addr_no: int, lst: list):
     if heap.Opts.out:
         if len(lst) == 1:
             s = '"%s"' % lst[0]
-            n = 1
         else:
             s = json.dumps(lst)
-            n = len(s)
-        print("a\t%d\t%s\t%d" % (addr_no, s, n))
+        print("a\t{}\t{}\t{}".format(addr_no, s, len(lst)))
 
 
 def __out_vout(tx_no: int, n: int, satoshi: int, addr: int):
     if heap.Opts.out:
-        print("o\t%d\t%d\t%d\t%s" % (tx_no, n, satoshi, '\\N' if addr is None else str(addr)))
+        print("o\t{}\t{}\t{}\t{}".format(tx_no, n, satoshi, '\\N' if addr is None else str(addr)))
 
 
 def work_bk(bk):
@@ -162,4 +160,4 @@ def work_bk(bk):
             # 5. vout
             # satosh = (value < -0.0) ? (int64_t) (BC_SPB * value - 0.5) : (int64_t) (BC_SPB * value + 0.5);
             # sql.add_vout(tx_no, vout["n"], int(vout["value"] * 100000000), addr_no)
-            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)
+            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)   # FIXME: float

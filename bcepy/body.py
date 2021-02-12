@@ -34,7 +34,6 @@ def walk(kbeg: int, kty: int):
         kbeg = 0
     heap.bk_no = kbeg * heap.Bulk_Size
     bk_to = heap.bk_no + (kty * heap.Bulk_Size)
-    # bk_to = 1
     bk_hash = rpc_connection.getblockhash(heap.bk_no)
     heap.timer = Timer()
     # 1. go

@@ -1,9 +1,5 @@
-"""
-Part of [python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc)
-Changes:
-- optional usage of python-ujson
-- removed ujson-incompatible things (extra options of loads/dumps)
 
+"""
   Copyright 2011 Jeff Garzik
 
   AuthServiceProxy has the following improvements over python-jsonrpc's
@@ -43,10 +39,8 @@ try:
 except ImportError:
     import httplib
 import base64
-try:
-    import ujson as json
-except ImportError:
-    import json
+import decimal
+import json
 import logging
 try:
     import urllib.parse as urlparse
@@ -78,10 +72,16 @@ class JSONRPCException(Exception):
         return '<%s \'%s\'>' % (self.__class__.__name__, self)
 
 
+def EncodeDecimal(o):
+    if isinstance(o, decimal.Decimal):
+        return float(round(o, 8))
+    raise TypeError(repr(o) + " is not JSON serializable")
+
 class AuthServiceProxy(object):
     __id_count = 0
 
-    def __init__(self, service_url, service_name=None, timeout=HTTP_TIMEOUT, connection=None):
+    def __init__(self, service_url, service_name=None, timeout=HTTP_TIMEOUT, 
+                 connection=None, ssl_context=None):
         self.__service_url = service_url
         self.__service_name = service_name
         self.__url = urlparse.urlparse(service_url)
@@ -108,7 +108,7 @@ class AuthServiceProxy(object):
             self.__conn = connection
         elif self.__url.scheme == 'https':
             self.__conn = httplib.HTTPSConnection(self.__url.hostname, port,
-                                                  timeout=timeout)
+                                                  timeout=timeout, context=ssl_context)
         else:
             self.__conn = httplib.HTTPConnection(self.__url.hostname, port,
                                                  timeout=timeout)
@@ -125,11 +125,11 @@ class AuthServiceProxy(object):
         AuthServiceProxy.__id_count += 1
 
         log.debug("-%s-> %s %s"%(AuthServiceProxy.__id_count, self.__service_name,
-                                 json.dumps(args)))
+                                 json.dumps(args, default=EncodeDecimal)))
         postdata = json.dumps({'version': '1.1',
                                'method': self.__service_name,
                                'params': args,
-                               'id': AuthServiceProxy.__id_count})
+                               'id': AuthServiceProxy.__id_count}, default=EncodeDecimal)
         self.__conn.request('POST', self.__url.path, postdata,
                             {'Host': self.__url.hostname,
                              'User-Agent': USER_AGENT,
@@ -157,7 +157,7 @@ class AuthServiceProxy(object):
             m = rpc_call.pop(0)
             batch_data.append({"jsonrpc":"2.0", "method":m, "params":rpc_call, "id":AuthServiceProxy.__id_count})
 
-        postdata = json.dumps(batch_data)
+        postdata = json.dumps(batch_data, default=EncodeDecimal)
         log.debug("--> "+postdata)
         self.__conn.request('POST', self.__url.path, postdata,
                             {'Host': self.__url.hostname,
@@ -166,6 +166,11 @@ class AuthServiceProxy(object):
                              'Content-type': 'application/json'})
         results = []
         responses = self._get_response()
+        if isinstance(responses, (dict,)):
+            if ('error' in responses) and (responses['error'] is not None):
+                raise JSONRPCException(responses['error'])
+            raise JSONRPCException({
+                'code': -32700, 'message': 'Parse error'})
         for response in responses:
             if response['error'] is not None:
                 raise JSONRPCException(response['error'])
@@ -188,9 +193,9 @@ class AuthServiceProxy(object):
                 'code': -342, 'message': 'non-JSON HTTP response with \'%i %s\' from server' % (http_response.status, http_response.reason)})
 
         responsedata = http_response.read().decode('utf8')
-        response = json.loads(responsedata)
+        response = json.loads(responsedata, parse_float=decimal.Decimal)
         if "error" in response and response["error"] is None:
-            log.debug("<-%s- %s"%(response["id"], json.dumps(response["result"])))
+            log.debug("<-%s- %s"%(response["id"], json.dumps(response["result"], default=EncodeDecimal)))
         else:
             log.debug("<-- "+responsedata)
         return response
