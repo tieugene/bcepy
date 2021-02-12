@@ -7,6 +7,7 @@ table=([a]="addresses" [b]="blocks" [t]="transactions" [d]="data" [z]="blocks,tr
 declare -A fields
 fields=([a]="a_id,a_list,n" [b]="b_id,b_time" [t]="t_id,b_id,hash" [d]="t_out_id,t_out_n,satoshi,a_id,t_in_id")
 
+dbhost="localhost"
 dbname=""
 dbuser=""
 tmpdir="."
@@ -47,19 +48,19 @@ function chk_table() {
 function drop() {
   t=${table[$1]}
   echo "Drop table[s] '$t'."
-  psql -q -c "DROP TABLE $t;" $dbname $dbuser
+  psql -q -c "DROP TABLE $t;" -h $dbhost $dbname $dbuser
 }
 
 function vacuum() {
   t=${table[$1]}
   echo "Vacuum table[s] '$t'."
-  psql -q -c "VACUUM FULL $t;" $dbname $dbuser
+  psql -q -c "VACUUM FULL $t;" -h $dbhost $dbname $dbuser
 }
 
 function trunc() {
   t=${table[$1]}
   echo "Truncate table[s] '$t'."
-  psql -q -c "TRUNCATE TABLE $t;" $dbname $dbuser
+  psql -q -c "TRUNCATE TABLE $t;" -h $dbhost $dbname $dbuser
 }
 
 # separate
@@ -67,10 +68,10 @@ function create() {
   if [ ! $1 = "z" ]; then
     t=$dn/sql/c$1.sql
     echo "Create table '${table[$1]}'."
-    psql -q -f $t $dbname $dbuser
+    psql -q -f $t -h $dbhost $dbname $dbuser
   else
     echo "Create all tables."
-    cat $dn/sql/{ca.sql,cb.sql,ct.sql,cd.sql} | psql -q $dbname $dbuser
+    cat $dn/sql/{ca.sql,cb.sql,ct.sql,cd.sql} | psql -q -h $dbhost $dbname $dbuser
   fi
 }
 
@@ -78,10 +79,10 @@ function idxoff() {
   if [ ! $1 = "z" ]; then
     t=$dn/sql/u$1.sql
     echo "Drop indices of '${table[$1]}' from '$t'."
-    psql -q -f $t $dbname $dbuser
+    psql -q -f $t -h $dbhost $dbname $dbuser
   else
     echo "Drop all indices."
-    cat $dn/sql/{ud.sql,ut.sql,ub.sql,ua.sql} | psql -q $dbname $dbuser
+    cat $dn/sql/{ud.sql,ut.sql,ub.sql,ua.sql} | psql -q -h $dbhost $dbname $dbuser
   fi
 }
 
@@ -89,10 +90,10 @@ function idxon() {
   if [ ! $1 = "z" ]; then
     t=$dn/sql/i$1.sql
     echo "Create indices of '${table[$1]}' from '$t'."
-    psql -q -f $t $dbname $dbuser
+    psql -q -f $t -h $dbhost $dbname $dbuser
   else
     echo "Create all indices."
-    cat $dn/sql/{ia.sql,ib.sql,it.sql,id.sql} | psql -q $dbname $dbuser
+    cat $dn/sql/{ia.sql,ib.sql,it.sql,id.sql} | psql -q -h $dbhost $dbname $dbuser
   fi
 }
 
@@ -133,7 +134,7 @@ function load() {
   t=${table[$1]}
   f=${fields[$1]}
   echo "Load table '$t'" >> /dev/stderr
-  psql -q -c "COPY $t ($f) FROM STDIN;" $dbname $dbuser
+  psql -q -c "COPY $t ($f) FROM STDIN;" -h $dbhost $dbname $dbuser
 }
 
 function reload() {
