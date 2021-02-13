@@ -5,6 +5,8 @@ Kyoto-cabinet version
 
 import kyotocabinet
 
+EXT = '.kch'    # (forgot)
+
 
 def _prn_key(key):
     """ Prints key as hex or string """
@@ -22,11 +24,15 @@ class KV(object):
         self.__db = kyotocabinet.DB()
         self.__fname = None
 
+    @staticmethod
+    def name():
+        return 'kc'
+
     def open(self, fname: str):
         """
         @param fname: filename for storage (w/o ext)
         """
-        self.__fname = fname + ".kch"
+        self.__fname = fname + EXT
         res = self.__db.open(self.__fname, kyotocabinet.DB.OWRITER | kyotocabinet.DB.OCREATE)  #  | kyotocabinet.DB.OTRUNCATE
         assert res, "Can't open DB '%s'" % self.__fname
         self.__counter = self.__db.count()

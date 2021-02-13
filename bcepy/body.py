@@ -28,7 +28,7 @@ def walk(kbeg: int, kty: int):
     cfg = load_conf()
     url = "http://{}:{}@{}:{}".format(cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport'])
     rpc_connection = Proxy(url, timeout=300)  # for heavy load
-    if mode.prepare(kbeg):
+    if not mode.prepare(kbeg):
         return
     if kbeg is None:    # FIXME: wut?
         kbeg = 0

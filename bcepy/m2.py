@@ -10,10 +10,17 @@ import os
 from . import heap
 from .utils import snow, pk2addr, eprint, Memer
 
+# consts
+PFX_KC = 'kc:'
+PFX_TK = 'tk:'
+__line = "===\t=======\t=======\t=======\t=======\t=======\t======="
+__fmt_head = "kBk\tTx\tIn\tOut\tAddr\tRAM,M\tTime,s\t{} (m2, {})\n{}"
+__fmt_interim = "{:03d}\t{}\t{}\t{}\t{}\t{}\t{}"
+__fmt_end = "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}"
+
+# vars
 Tx = None
 Addr = None
-
-__line = "===\t=======\t=======\t=======\t=======\t=======\t======="
 
 
 def prepare(kbeg: int) -> bool:
@@ -36,13 +43,27 @@ def prepare(kbeg: int) -> bool:
         Addr.open(1)
     """
     global Tx, Addr
-    if heap.Opts.kvdir:  # defined => kyotocabinet
-        from .kv.kc import KV
+    if heap.Opts.kvdir:  # defined => file-based (kyotocabinet | tkrzw)
+        if heap.Opts.kvdir.startswith(PFX_KC):
+            from .kv.kc import KV
+            kv_dir = heap.Opts.kvdir[len(PFX_KC):]
+        elif heap.Opts.kvdir.startswith(PFX_TK):
+            from .kv.tkx import KV
+            kv_dir = heap.Opts.kvdir[len(PFX_TK):]
+        else:
+            kv_dir = heap.Opts.kvdir
+            try:
+                from .kv.tkx import KV  # default
+            finally:
+                from .kv.kc import KV
+        if not os.path.isdir(kv_dir):
+            eprint("'{} is not folder or not exists".format(kv_dir))
+            return
         Tx = KV()
-        Tx.open(os.path.join(heap.Opts.kvdir, "tx"))
+        Tx.open(os.path.join(kv_dir, "tx"))
         Addr = KV()
-        Addr.open(os.path.join(heap.Opts.kvdir, "addr"))
-    else:               # inmem
+        Addr.open(os.path.join(kv_dir, "addr"))
+    else:  # inmem
         from .kv.inmem import KV
         Tx = KV()
         Addr = KV()
@@ -50,33 +71,34 @@ def prepare(kbeg: int) -> bool:
     if tx_count:
         if kbeg is None:
             eprint("Error: Tx is not empty ({} items). Set -f option.".format(tx_count))
-            return True
+            return
         if kbeg == 0:
             Tx.clean()
             Addr.clean()
     else:
         if kbeg:
             eprint("Error: Tx is empty. Use '-f 0' or skip it.")
-            return True
+            return
     heap.memer = Memer()
     heap.memer.start()
+    return True
 
 
 def prn_head():
-    return "kBk\tTx\tIn\tOut\tAddr\tRAM,M\tTime,s\t{} (m2)\n{}".format(snow(), __line)
+    return __fmt_head.format(snow(), Tx.name(), __line)
 
 
 def prn_interim():
-    return "{:03d}\t{}\t{}\t{}\t{}\t{}\t{}".format(
+    return __fmt_interim.format(
         heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count, heap.addr_count,
         heap.memer.now(), heap.timer.now())
 
 
 def prn_tail():
-    return "{}\n{:03d}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\nMax tx/bk:\t{}\nMax in/tx:\t{}\nMax out/tx:\t{}\nMax addr/out:\t{}".format(
-           __line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
-            heap.addr_count, heap.memer.now(), heap.timer.now(), snow(),
-            heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
+    return __fmt_end.format(
+        __line, heap.bk_no // heap.Bulk_Size, heap.tx_count, heap.in_count, heap.out_count,
+        heap.addr_count, heap.memer.now(), heap.timer.now(), snow(),
+        heap.max_bk_tx, heap.max_tx_in, heap.max_tx_out, heap.max_out_addr)
 
 
 def __out_bk(bk_no: int, ts: int, hsh: str):
@@ -164,4 +186,4 @@ def work_bk(bk):
             # 5. vout
             # satosh = (value < -0.0) ? (int64_t) (BC_SPB * value - 0.5) : (int64_t) (BC_SPB * value + 0.5);
             # sql.add_vout(tx_no, vout["n"], int(vout["value"] * 100000000), addr_no)
-            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)   # FIXME: float
+            __out_vout(tx_no, vout['n'], int(vout["value"] * 100000000), addr_no)  # FIXME: float

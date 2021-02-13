@@ -31,4 +31,4 @@ class Opts(object):
 # misc vars
 logfile = None
 timer = None
-# memer = None
+memer = None

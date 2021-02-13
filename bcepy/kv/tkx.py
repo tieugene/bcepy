@@ -1,9 +1,12 @@
 """
 Key-value things.
-Redis version (https://github.com/andymccurdy/redis-py)
+TKRZW version
 """
 
-import redis
+import tkrzw
+
+
+EXT = '.tkh'    # (forgot)
 
 
 def _prn_key(key):
@@ -19,22 +22,25 @@ class KV(object):
 
     def __init__(self):
         self.__counter = 0
-        self.__db = None
+        self.__db = tkrzw.DBM()
+        self.__fname = None
 
     @staticmethod
     def name():
-        return 'redis'
+        return 'tkrzw'
 
-    def open(self, dbno: int):
+    def open(self, fname: str):
         """
-        @param pfx: filename for storage (w/o ext)
+        @param fname: filename for storage (w/o ext)
         """
-        self.__db = redis.Redis(unix_socket_path='/tmp/redis.sock', db=dbno)
-        self.__counter = self.__db.dbsize()
+        self.__fname = fname + EXT
+        res = self.__db.Open(self.__fname, True)  # , truncate=True
+        assert res, "Can't open DB '%s'" % self.__fname
+        self.__counter = self.__db.Count()
 
     def clean(self):
-        self.__db.flushdb()
-        self.__counter = self.__db.dbsize()
+        self.__db.Clear()
+        self.__counter = self.__db.Count()
 
     def get_count(self) -> int:
         """Ask counter
@@ -42,26 +48,26 @@ class KV(object):
         """
         return self.__counter  # self.__db.count()
 
-    def exists(self, key) -> bool:
-        return self.__db.exists(key) >= 0
+    def exists(self, key: bytes) -> bool:
+        return self.__db.Get(key) is not None
 
-    def get(self, key) -> int:  # or None
+    def get(self, key: bytes) -> int:
         """
         Get value by key
         TODO: add strict mode (get or exception)
         return: value or None
         """
-        res = self.__db.get(key)    # value or None
+        res = self.__db.Get(key)    # value or None
         if res is not None:
             res = int(res)
         return res
 
-    def add(self, key) -> int:
+    def add(self, key: bytes) -> int:
         """
          Adds record _strictly_ (no dup)
          @return: v of new record; exception if exists
          """
-        res = self.__db.setnx(key, self.__counter)
+        res = self.__db.Set(key, self.__counter)  # True on success, False if exists; set == add_or_replace
         assert res, "Can't add record k=%s, v=%d" % (_prn_key(key), self.__counter)
         self.__counter += 1
         return self.__counter - 1
