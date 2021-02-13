@@ -19,6 +19,10 @@ class KV(object):
         self.__counter = 0
         self.__db = dict()
 
+    @staticmethod
+    def name():
+        return 'mem'
+
     def open(self, fname: str = None):
         pass
 

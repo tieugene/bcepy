@@ -38,6 +38,8 @@ Without `-v` option short version ('verbosity=1') of bitcoind response used.
 This utility is for tests and harware perfomance ratings.<br/>
 Bitcoind connection are loading from bitcoin.conf as it is required for bitcoin-cli.
 
+'-c' - you can set simply folder or set k-v type: 'kc:/my/path' for kyotocabinet or 'tk:/my/path' for tkrzw.
+
 ### bce2.py
 
 The same as bce1.py (`-m 0|1` option) but generates interim flat text for further conversion(`-m 2` option).<br/>

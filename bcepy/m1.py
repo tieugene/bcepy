@@ -10,7 +10,7 @@ __line = "===\t=======\t=======\t=======\t=======\t====="
 
 
 def prepare(_):
-    pass
+    return True
 
 
 def prn_head():
