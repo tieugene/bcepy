@@ -1,4 +1,4 @@
-# bcepy - *B*it*C*oin *E*xport (*PY*thon version)
+# bcepy - *B*it*c*oin *e*xport (*py*thon version)
 
 Exports BTC blockchain into SQL DB loadable data.
 
@@ -15,43 +15,42 @@ This application:
 
 - running bitcoind
 - python3
-- python3-kyotocabinet or python3-redis
-- python3-ujson (optionaly)
-- free space for:
-  - blockchain (~350GB+ on 2021-02-12)
-  - interim bcepy.py data (~&frac14; blockchain)
-  - key-value storage (~&frac14; blockchain; tx.kch + addr.kch)
+- python3-kyotocabinet or python3-tkrzw (optional)
 
 Bundled contribs:
 
 - [python-bitcoinrpc](https://github.com/jgarzik/python-bitcoinrpc/blob/master/bitcoinrpc/authproxy.py) as [btc/authproxy.py](btc/authproxy.py)
-- [python-base58](https://github.com/keis/base58/blob/master/base58/__init__.py) as [btc/base58.py]
+- [python-base58](https://github.com/keis/base58/blob/master/base58/__init__.py) as [btc/base58.py](btc/base58.py)
 
 ## 3. Installation
 
+- `git clone` or `rpm -i`.
+- setup bitcoind and/or connection to them according to [documentation](doc/bitcoind.md)
+- free space for:
+  - blockchain (~350GB+ on 2021-01-01)
+  - bcepy output data (~&frac14; of blockchain size (if gziped))
+  - key-value storage (~&frac14; of blockchain size (tx.* + addr.*))
 
 ## 4. Usage
 
-Counts blocks size, transactions, vouts and vins querying bitcoind like `bitcoin-cli getblock <hash>`.<br/>
-Without `-v` option short version ('verbosity=1') of bitcoind response used.
-`-v` option uses 'verbosity=2' queries.<br/>
-This utility is for tests and harware perfomance ratings.<br/>
-Bitcoind connection are loading from bitcoin.conf as it is required for bitcoin-cli.
-
-'-c' - you can set simply folder or set k-v type: 'kc:/my/path' for kyotocabinet or 'tk:/my/path' for tkrzw.
-
-### bce2.py
-
-The same as bce1.py (`-m 0|1` option) but generates interim flat text for further conversion(`-m 2` option).<br/>
-Options:
- - -m 0 - 
+Bitcoind connection are loading from bitcoin.conf as it is required for bitcoin-cli.<br/>
+Options (use `-h` for help):
+- `-f` *int*: from kiloblock (default 0)
+- `-q` *int*: kiloblocks to process (default 1 kbk == 1000 blocks)
+- `-l`: write log file (yymmddhhMMss.log)
+- `-m` *mode*:
+  - `0`: counts blocks (bk), their size and transactions (tx) querying bitcoind like `bitcoin-cli getblock <hash> 1`.
+  - `1`: == `0` + vouts and vins.
+  - `2`: == `1` + addresses. Uses key-value storage (default in-memory; see `-c`). Quiet without `-o` option (just fills out key-values)
+- `-o`: generates text output (`-m 2` only, stdout)
+- `-c` *dir*: set file-based key-value storage. Using `kc:` (kyotocabinet) or `tk:` path prefix set exact key-value backend. Ommiting prefix cause trying kyotocabinet then tkrzw then exception if both are absent.
 
 ## 5. Results
 
-Plaintext with records:
+Plaintext records (tab separated lines):
 
-- `b	id		'datetime'	'hash'`
-- `t	id		b.id		hash`
-- `i	<t.id	vout		t.id`
-- `o	t.id	vout		$		[a.id]`
-- `a	id		"addr"		qty`
+- `b	id		'datetime'	'hash'` - block
+- `t	id		b.id		hash` - transaction
+- `i	<t.id	vout		t.id` - vin
+- `o	t.id	vout		$		[a.id]` - vout
+- `a	id		"addr"		qty` - address
