@@ -6,6 +6,7 @@ Setting up bitcoind server and client.
 - blockchain path: $BCPATH
 - bitcoind rpc user: $RPCUSER
 - bitcoind rpc password: $RPCPASS
+- bitcoind host IP: $BTCDIP
 
 ## 1. Server
 
@@ -81,13 +82,15 @@ sudo dnf install bitcoin-utils
 rpcuser=$RPCUSER
 rpcpassword=$RPCUSER
 # next line optional
-
+rpcconnect=$BTCDIP
 ```
 
 ### 2.3. Check:
 
 ```bash
 bitcoin-cli help
+bitcoin-cli getblockcount
+bitcoin-cli getblock `bitcoin-cli getblockhash 0`
 ```
 
 ## Misc
