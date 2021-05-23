@@ -56,9 +56,9 @@ def load_conf() -> dict:
         cfg['rpcconnect'] = 'localhost'
     if 'rpcport' not in cfg:
         cfg['rpcport'] = '8332'
-    return cfg
-    # return ('http://{}:{}@{}:{}'.format(
-    #    cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport']))
+    #return cfg
+    return ('http://{}:{}@{}:{}'.format(
+        cfg['rpcuser'], cfg['rpcpassword'], cfg['rpcconnect'], cfg['rpcport']))
 
 
 class Timer(object):
