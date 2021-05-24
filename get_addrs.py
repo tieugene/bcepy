@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 """
 Get blockchain addresses from bitcoind.
-200k @ P4-3.0:  4239"
-200k @ i7-4790: 2635"
 """
 
 import argparse
@@ -24,6 +22,7 @@ def walk(beg: int, qty: int):
     bk_hash = rpc_connection.getblockhash(beg)
     heap.timer = Timer()
     heap.timer.start()
+    bk_no = 0
     # 1. go
     for bk_no in range(beg, end):
         bk = rpc_connection.getblock(bk_hash, 2)
